@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: laforet-immobilier
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+databases:
+  - name: laforet-postgres

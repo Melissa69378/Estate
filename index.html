@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="LaForêt Immobilier - Des adresses qui vous ressemblent." />
+    <title>LaForêt Immobilier | Des adresses qui vous ressemblent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="virtual-tour.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/node_modules/three/build/three.module.js",
+          "@photo-sphere-viewer/core": "/node_modules/@photo-sphere-viewer/core/index.module.js",
+          "@photo-sphere-viewer/markers-plugin": "/node_modules/@photo-sphere-viewer/markers-plugin/index.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#accueil" aria-label="LaForêt Immobilier, accueil">
+        <img class="official-logo" src="laforet-logo.svg" alt="LaForêt Immobilier" />
+      </a>
+      <nav class="desktop-nav" aria-label="Navigation principale">
+        <a href="#acheter">Acheter</a>
+        <a href="#louer">Louer</a>
+        <a href="#vendre">Vendre</a>
+        <a href="#agences">Nos agences</a>
+      </nav>
+      <div class="language-switcher" aria-label="Choisir la langue"><span>Langue</span><div id="google_translate_element"></div></div>
+      <a class="header-action" href="#contact">Parlons de votre projet <span aria-hidden="true">↗</span></a>
+      <button class="cart-button" type="button" aria-label="Ouvrir le panier" aria-expanded="false"><span aria-hidden="true">▱</span><b class="cart-count">0</b></button>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+      <div class="mobile-menu">
+        <a href="#acheter">Acheter</a><a href="#louer">Louer</a><a href="#vendre">Vendre</a><a href="#agences">Nos agences</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="accueil">
+        <div class="hero-image"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <p class="eyebrow">L'immobilier, autrement</p>
+          <h1>Des adresses<br /><em>qui vous ressemblent.</em></h1>
+          <p class="hero-intro">Depuis plus de 30 ans, nous vous accompagnons dans les moments qui comptent.</p>
+        </div>
+        <div class="hero-bottom">
+          <div class="hero-scroll"><span></span> Découvrir</div>
+          <div class="hero-location">La vie est belle<br /><span>partout où l'on se sent chez soi</span></div>
+        </div>
+      </section>
+
+      <section class="search-wrap" id="acheter">
+        <div class="section-label">Votre projet</div>
+        <div class="search-box">
+          <div class="search-tabs" role="tablist" aria-label="Type de recherche">
+            <button class="search-tab active" data-mode="Acheter" type="button">Acheter</button>
+            <button class="search-tab" data-mode="Louer" type="button">Louer</button>
+          </div>
+          <form class="search-form">
+            <label>Je recherche <select aria-label="Type de bien"><option value="">Tous les biens</option><option value="Hôtel particulier">Hôtel particulier</option><option value="Villa">Villa</option><option value="Château">Château</option><option value="Appartement">Appartement</option><option value="Maison">Maison</option><option value="Chalet">Chalet</option><option value="Manoir">Manoir</option></select></label>
+            <label>Où ? <input type="text" placeholder="Paris, Nice, Megève, Cannes, Saint-Émilion..." /></label>
+            <button class="search-button" type="submit"><span>Voir les biens</span><strong>↗</strong></button>
+          </form>
+          <p class="search-feedback" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section class="discover" id="louer">
+        <div class="discover-copy">
+          <p class="eyebrow dark">Une histoire d'excellence</p>
+          <h2>Ouvrir la porte<br /><em>aux possibles.</em></h2>
+          <p>Un nouveau départ, un projet de vie, un investissement d'exception. Chez LaForêt Prestige, chaque adresse a une histoire et chaque histoire mérite une attention particulière.</p>
+          <a class="text-link" href="#agences">Découvrir notre approche <span>↗</span></a>
+        </div>
+        <div class="discover-image"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85" alt="Maison contemporaine lumineuse entourée de verdure" /></div>
+      </section>
+
+      <section class="properties" id="vendre">
+        <div class="section-heading"><div><p class="eyebrow dark">Annonces immobilières</p><h2>Votre prochain <em>chez-vous.</em></h2><p class="section-intro">Découvrez notre sélection de biens d'exception à vendre et trouvez l'adresse qui correspond à votre projet.</p></div><a class="text-link" href="#acheter">Affiner ma recherche <span>↗</span></a></div>
+        <div class="listing-toolbar"><div><strong class="listing-count">12 biens</strong><span> · sélectionnés pour vous</span></div><label for="listing-sort">Trier par<select id="listing-sort"><option value="featured">Notre sélection</option><option value="price-low">Prix croissant</option><option value="price-high">Prix décroissant</option><option value="name">Nom du bien</option></select></label></div>
+        <div class="property-grid">
+          <article class="property-card" data-id="1" data-type="Hôtel particulier" data-property="Hôtel Particulier Champ-de-Mars" data-location="Paris 7e · Avenue Émile-Deschanel" data-coordinates="2.2982,48.8558" data-price="9,85 M€"><div class="property-image image-one"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Hôtel Particulier Champ-de-Mars aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Hôtel particulier · Paris 7e · Avenue Émile-Deschanel</p><h3>Hôtel Particulier Champ-de-Mars</h3><strong>9,85 M€</strong><div class="property-meta"><span>9 pièces</span><span>385 m²</span><span>5 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Hôtel Particulier Champ-de-Mars in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="2" data-type="Villa" data-property="Villa Belle Époque &quot;Le Roc Fleuri&quot;" data-location="Nice · Boulevard Carnot, Cap de Nice" data-coordinates="7.2915,43.6890" data-price="6,90 M€"><div class="property-image image-two"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Villa Belle Époque &quot;Le Roc Fleuri&quot; aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Villa · Nice · Boulevard Carnot, Cap de Nice</p><h3>Villa Belle Époque "Le Roc Fleuri"</h3><strong>6,90 M€</strong><div class="property-meta"><span>8 pièces</span><span>320 m²</span><span>5 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Villa Belle Époque in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="3" data-type="Château" data-property="Château &amp; Vignoble de Saint-Émilion" data-location="Saint-Émilion · Route des Châteaux, Gironde" data-coordinates="-0.1558,44.8943" data-price="4,45 M€"><div class="property-image image-three"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Château &amp; Vignoble de Saint-Émilion aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Château · Saint-Émilion · Route des Châteaux, Gironde</p><h3>Château & Vignoble de Saint-Émilion</h3><strong>4,45 M€</strong><div class="property-meta"><span>12 pièces</span><span>540 m²</span><span>7 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Château &amp; Vignoble de Saint-Émilion in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="4" data-type="Appartement" data-property="Appartement de Réception Place des Vosges" data-location="Paris 4e · Place des Vosges, Le Marais" data-coordinates="2.3662,48.8555" data-price="4,85 M€"><div class="property-image image-four"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Appartement de Réception Place des Vosges aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Appartement · Paris 4e · Place des Vosges, Le Marais</p><h3>Appartement de Réception Place des Vosges</h3><strong>4,85 M€</strong><div class="property-meta"><span>5 pièces</span><span>195 m²</span><span>3 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Appartement de Réception Place des Vosges in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="5" data-type="Maison" data-property="Bastide Provençale en Pierre du Luberon" data-location="Gordes · Chemin des Bories, Luberon" data-coordinates="5.2001,43.9126" data-price="3,75 M€"><div class="property-image image-five"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Bastide Provençale en Pierre du Luberon aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Maison · Gordes · Chemin des Bories, Luberon</p><h3>Bastide Provençale en Pierre du Luberon</h3><strong>3,75 M€</strong><div class="property-meta"><span>7 pièces</span><span>290 m²</span><span>4 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Bastide Provençale in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="6" data-type="Chalet" data-property="Chalet d'Alpage &quot;Le Grand Cerf&quot;" data-location="Megève · Route du Mont-d'Arbois, Haute-Savoie" data-coordinates="6.6342,45.8569" data-price="7,80 M€"><div class="property-image image-six"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Chalet d'Alpage &quot;Le Grand Cerf&quot; aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Chalet · Megève · Route du Mont-d'Arbois, Haute-Savoie</p><h3>Chalet d'Alpage "Le Grand Cerf"</h3><strong>7,80 M€</strong><div class="property-meta"><span>8 pièces</span><span>340 m²</span><span>5 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Chalet d'Alpage in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="7" data-type="Manoir" data-property="Manoir Anglo-Normand du Triangle d'Or" data-location="Deauville · Avenue de la République, Calvados" data-coordinates="0.0750,49.3592" data-price="2,15 M€"><div class="property-image image-seven"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Manoir Anglo-Normand aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Manoir · Deauville · Avenue de la République, Calvados</p><h3>Manoir Anglo-Normand du Triangle d'Or</h3><strong>2,15 M€</strong><div class="property-meta"><span>8 pièces</span><span>260 m²</span><span>5 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Manoir Anglo-Normand in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="8" data-type="Appartement" data-property="Penthouse Panoramique Parc Tête d'Or" data-location="Lyon 6e · Boulevard des Belges, Rhône" data-coordinates="4.8512,45.7725" data-price="2,65 M€"><div class="property-image image-eight"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Penthouse Panoramique aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Appartement · Lyon 6e · Boulevard des Belges, Rhône</p><h3>Penthouse Panoramique Parc Tête d'Or</h3><strong>2,65 M€</strong><div class="property-meta"><span>6 pièces</span><span>215 m²</span><span>4 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Penthouse Panoramique in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="9" data-type="Maison" data-property="Maison de Maître &amp; Pavillon d'Amis" data-location="Biarritz · Avenue de l'Impératrice, Le Phare" data-coordinates="-1.5540,43.4905" data-price="3,90 M€"><div class="property-image image-nine"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Maison de Maître aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Maison · Biarritz · Avenue de l'Impératrice, Le Phare</p><h3>Maison de Maître & Pavillon d'Amis</h3><strong>3,90 M€</strong><div class="property-meta"><span>9 pièces</span><span>310 m²</span><span>6 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Maison de Maître in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="10" data-type="Hôtel particulier" data-property="Hôtel Particulier du Quartier Mazarin" data-location="Aix-en-Provence · Rue Cardinale, Bouches-du-Rhône" data-coordinates="5.4497,43.5246" data-price="3,20 M€"><div class="property-image image-ten"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Hôtel Particulier Mazarin aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Hôtel particulier · Aix-en-Provence · Rue Cardinale</p><h3>Hôtel Particulier du Quartier Mazarin</h3><strong>3,20 M€</strong><div class="property-meta"><span>7 pièces</span><span>275 m²</span><span>4 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Hôtel Particulier Mazarin in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="11" data-type="Villa" data-property="Villa d'Architecte en Cèdre &amp; Accès Bassin" data-location="Lège-Cap-Ferret · Boulevard de la Plage, Gironde" data-coordinates="-1.2464,44.6291" data-price="4,20 M€"><div class="property-image image-eleven"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Villa d'Architecte aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Villa · Lège-Cap-Ferret · Boulevard de la Plage, Gironde</p><h3>Villa d'Architecte en Cèdre & Accès Bassin</h3><strong>4,20 M€</strong><div class="property-meta"><span>7 pièces</span><span>230 m²</span><span>4 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Villa d'Architecte in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+          <article class="property-card" data-id="12" data-type="Manoir" data-property="Manoir Breton des Marais &amp; Dépendances" data-location="Guérande · Presqu'île Guérandaise, Loire-Atlantique" data-coordinates="-2.4285,47.3283" data-price="1,89 M€"><div class="property-image image-twelve"><span>À vendre</span><button class="property-favorite" type="button" aria-label="Ajouter Manoir Breton aux favoris" aria-pressed="false">♡</button></div><div class="property-info"><p>Manoir · Guérande · Presqu'île Guérandaise</p><h3>Manoir Breton des Marais & Dépendances</h3><strong>1,89 M€</strong><div class="property-meta"><span>10 pièces</span><span>350 m²</span><span>6 chambres</span></div><div class="property-actions"><button class="tour-trigger" type="button" aria-label="Explore Manoir Breton in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button><button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button><button class="cart-add" type="button"><span aria-hidden="true">+</span> Réserver</button></div></div></article>
+        </div>
+        <p class="listing-empty" hidden>Aucun bien ne correspond à votre recherche. Essayez une autre ville ou un autre type de bien.</p>
+      </section>
+
+      <section class="virtual-feature" aria-labelledby="virtual-feature-title">
+        <div class="virtual-feature-copy">
+          <p class="eyebrow dark">Une nouvelle façon de visiter</p>
+          <h2 id="virtual-feature-title">VILLA <em>VIRTUALLY</em></h2>
+          <p>Entrez dans une sélection d'adresses d'exception et explorez chaque volume à votre rythme. Du salon d'apparat à la suite parentale, la visite continue partout où votre curiosité vous mène.</p>
+          <button class="featured-tour-trigger" type="button" data-property="Hôtel Particulier Champ-de-Mars" data-property-id="1">EXPLORE IN 3D <span>↗</span></button>
+        </div>
+        <div class="virtual-feature-art" aria-hidden="true"><div class="feature-art-label"><span>VILLA VIRTUALLY</span><strong>HÔTEL PARTICULIER<br />CHAMP-DE-MARS</strong><small>Immersive property scan · 01</small></div><div class="feature-art-grid"></div></div>
+      </section>
+
+      <section class="agencies" id="agences">
+        <div class="agency-number">01 <span>/ 03</span></div>
+        <div><p class="eyebrow">Au plus près de vous</p><h2>Une expertise<br /><em>qui a du sens.</em></h2><p class="agency-copy">Avec plus de 700 agences en France, nos conseillers connaissent votre quartier comme personne. Une présence locale, une vision juste, un accompagnement sur mesure.</p><a class="outline-link" href="#contact">Trouver mon agence <span>↗</span></a></div>
+        <div class="agency-photo"></div>
+      </section>
+
+      <section class="contact" id="contact"><p class="eyebrow dark">Et si on en parlait ?</p><h2>Votre prochaine adresse<br /><em>commence ici.</em></h2><a class="contact-button" href="mailto:bonjour@laforet.com">Échanger avec un conseiller <span>↗</span></a></section>
+    </main>
+    <aside class="cart-drawer" aria-label="Panier de réservation" aria-hidden="true"><div class="cart-head"><div><p class="eyebrow dark">Votre sélection</p><h2>Panier</h2></div><button class="cart-close" type="button" aria-label="Fermer le panier">×</button></div><div class="cart-items"></div><div class="cart-empty"><span>▱</span><strong>Votre panier est vide</strong><p>Ajoutez un bien pour commencer votre demande de réservation.</p></div><div class="cart-checkout"><div class="cart-total"><span>Total indicatif</span><strong class="cart-total-value">0 €</strong></div><p class="cart-note">Un conseiller confirmera les détails et les modalités avant tout paiement définitif.</p><form class="checkout-form"><label>Votre email<input type="email" placeholder="vous@exemple.fr" required /></label><fieldset><legend>Mode de paiement préféré</legend><label class="payment-option"><input type="radio" name="payment" value="card" checked /><span>▣</span> Carte bancaire</label><label class="payment-option"><input type="radio" name="payment" value="paypal" /><span>◉</span> PayPal</label><label class="payment-option"><input type="radio" name="payment" value="apple" /><span>●</span> Apple Pay</label><label class="payment-option"><input type="radio" name="payment" value="transfer" /><span>↗</span> Virement bancaire</label></fieldset><div class="card-fields"><label>Numéro de carte<input inputmode="numeric" placeholder="0000 0000 0000 0000" /></label><div><label>Expiration<input placeholder="MM / AA" /></label><label>CVV<input inputmode="numeric" placeholder="000" /></label></div></div><button class="checkout-button" type="submit">Continuer la demande <span>↗</span></button></form></div></aside><div class="cart-backdrop"></div>
+    <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-title" aria-hidden="true"><div class="map-backdrop"></div><div class="map-panel"><div class="map-panel-head"><div><p class="eyebrow dark">Explorer le quartier</p><h2 id="map-title">Vue 3D</h2><p class="map-location"></p></div><button class="map-close" type="button" aria-label="Fermer la carte">×</button></div><div class="map-canvas" aria-label="Carte 3D interactive"></div><div class="map-panel-foot"><span><i></i> Emplacement indicatif</span><small>Inclinez et faites pivoter la carte pour explorer les environs</small></div></div></div>
+    <div class="tour-modal" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-hidden="true"><div class="tour-backdrop"></div><div class="tour-panel"><div class="tour-header"><div><p class="eyebrow">Visite immersive</p><h2 id="tour-title">Visite 3D</h2><p class="tour-location"></p></div><button class="tour-close" type="button" aria-label="Fermer la visite">×</button></div><div class="tour-tabs" role="tablist" aria-label="Pièces et vues"><button class="tour-tab active" type="button" data-scene="exterior">Extérieur</button><button class="tour-tab" type="button" data-scene="interior">Intérieur</button><button class="tour-tab" type="button" data-scene="surroundings">Alentours</button></div><div class="tour-stage"><div class="tour-scene exterior-scene"><span class="tour-badge">Vue extérieure · 01 / 03</span><button class="tour-hotspot hotspot-garden" type="button" data-detail="Jardin paysager · terrasse plein sud">1</button><button class="tour-hotspot hotspot-entrance" type="button" data-detail="Entrée principale · accès sécurisé">2</button></div><div class="tour-scene interior-scene"><span class="tour-badge">Vue intérieure · 02 / 03</span><button class="tour-hotspot hotspot-living" type="button" data-detail="Séjour traversant · lumière naturelle">1</button><button class="tour-hotspot hotspot-kitchen" type="button" data-detail="Cuisine ouverte · équipements intégrés">2</button></div><div class="tour-scene surroundings-scene"><span class="tour-badge">Quartier · 03 / 03</span><div class="surroundings-copy"><span>À proximité</span><strong>Vivre ici, au rythme du quartier</strong><small>Transports, commerces et nature à quelques minutes.</small></div></div><p class="tour-detail" aria-live="polite">Sélectionnez un point pour découvrir les détails du bien.</p></div><div class="tour-footer"><button class="tour-prev" type="button">← Vue précédente</button><span class="tour-progress">01 / 03</span><button class="tour-next" type="button">Vue suivante →</button></div></div></div>
+    <footer><a class="brand footer-brand" href="#accueil"><img class="official-logo" src="laforet-logo.svg" alt="LaForêt Immobilier" /></a><p>La vie est belle partout où l'on se sent chez soi.</p><div><a href="#contact">Contact</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a><a href="#contact">Mentions légales</a></div></footer>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="script.js"></script>
+    <script type="module" src="virtual-tour.js"></script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  </body>
+</html>

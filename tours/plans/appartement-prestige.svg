@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="100%" height="100%">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1"/>
+    </pattern>
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="900" height="640" fill="#121815" rx="14"/>
+  <rect width="900" height="640" fill="url(#grid)" rx="14"/>
+
+  <!-- Compass Rose -->
+  <g transform="translate(820, 75)" opacity="0.75">
+    <circle cx="0" cy="0" r="22" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+    <polygon points="0,-19 5,-5 0,0 -5,-5" fill="#e4a347"/>
+    <polygon points="0,19 5,5 0,0 -5,5" fill="rgba(255,255,255,0.25)"/>
+    <text x="0" y="-23" fill="#e4a347" font-family="'DM Sans', sans-serif" font-size="10" font-weight="700" text-anchor="middle">N</text>
+  </g>
+
+  <!-- Title Badge -->
+  <g transform="translate(45, 55)">
+    <text x="0" y="0" fill="#e4a347" font-family="'DM Sans', sans-serif" font-size="10" font-weight="700" letter-spacing="2">PLAN ARCHITECTURAL D'EXCEPTION</text>
+    <text x="0" y="24" fill="#ffffff" font-family="'Playfair Display', serif" font-size="20" font-weight="500">Appartement de Réception Traversant</text>
+    <text x="0" y="44" fill="#8ca094" font-family="'DM Sans', sans-serif" font-size="12">Surface Carrez : 265 m² · Hauteur sous plafond : 3m90</text>
+  </g>
+
+  <g filter="url(#soft-glow)">
+    
+  <rect x="70" y="110" width="760" height="460" fill="#16221c" stroke="#2a3930" stroke-width="2" rx="4"/>
+
+  <!-- Rooftop / Balcon (Haut) -->
+  <rect x="70" y="110" width="760" height="90" fill="#12241b" stroke="#375543" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <text x="450" y="155" fill="#88c29e" font-family="'DM Sans', sans-serif" font-size="13" font-weight="600" text-anchor="middle" letter-spacing="1">BALCON FILANT &amp; VUE PANORAMIQUE</text>
+
+  <!-- Salon Traversant (Centre) -->
+  <rect x="70" y="200" width="450" height="230" fill="#203328" stroke="#e4a347" stroke-opacity="0.4" stroke-width="1.5"/>
+  <text x="295" y="305" fill="#fef3c7" font-family="'DM Sans', sans-serif" font-size="16" font-weight="700" text-anchor="middle">SALON TRAVERSANT</text>
+  <text x="295" y="328" fill="#9ca3af" font-family="'DM Sans', sans-serif" font-size="12" text-anchor="middle">82 m² · Parquet Point de Hongrie &amp; Cheminées</text>
+
+  <!-- Bibliothèque / Bureau (Bas Gauche) -->
+  <rect x="70" y="430" width="450" height="140" fill="#1b2721" stroke="#4ade80" stroke-opacity="0.25" stroke-width="1.5"/>
+  <text x="295" y="495" fill="#f3f4f6" font-family="'DM Sans', sans-serif" font-size="14" font-weight="600" text-anchor="middle">BIBLIOTHÈQUE EN NOYER &amp; BUREAU</text>
+  <text x="295" y="515" fill="#9ca3af" font-family="'DM Sans', sans-serif" font-size="11" text-anchor="middle">35 m² · Menuiseries Sur Mesure</text>
+
+  <!-- Suite de Maître (Droite Haut) -->
+  <rect x="520" y="200" width="310" height="190" fill="#1e2c24" stroke="#4ade80" stroke-opacity="0.25" stroke-width="1.5"/>
+  <text x="675" y="290" fill="#f3f4f6" font-family="'DM Sans', sans-serif" font-size="14" font-weight="600" text-anchor="middle">SUITE DE MAÎTRE</text>
+  <text x="675" y="310" fill="#9ca3af" font-family="'DM Sans', sans-serif" font-size="11" text-anchor="middle">42 m² · Calme Absolu sur Cour Royale</text>
+
+  <!-- Bains & Dressing (Droite Bas) -->
+  <rect x="520" y="390" width="310" height="180" fill="#192620" stroke="#4ade80" stroke-opacity="0.25" stroke-width="1.5"/>
+  <text x="675" y="475" fill="#f3f4f6" font-family="'DM Sans', sans-serif" font-size="14" font-weight="600" text-anchor="middle">BAINS EN MARBRE &amp; DRESSING</text>
+  <text x="675" y="495" fill="#9ca3af" font-family="'DM Sans', sans-serif" font-size="11" text-anchor="middle">22 m² · Baignoire Îlot Sculpturale</text>
+
+  <!-- Walls -->
+  <path d="M 70 200 L 830 200" stroke="#4b5563" stroke-width="6"/>
+  <path d="M 520 200 L 520 570" stroke="#4b5563" stroke-width="6"/>
+  <path d="M 70 430 L 520 430" stroke="#4b5563" stroke-width="5"/>
+  <path d="M 520 390 L 830 390" stroke="#4b5563" stroke-width="5"/>
+
+  </g>
+</svg>

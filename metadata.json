@@ -1,0 +1,6 @@
+{
+  "name": "LaForêt Immobilier",
+  "description": "Site immobilier public et interface d'administration avec visites 3D immersives et catalogue de biens.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

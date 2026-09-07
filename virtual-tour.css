@@ -1,0 +1,61 @@
+@import "./components/property-tour/property-tour.css";
+
+:root { --tour-gold: #d8aa63; --tour-black: #0a100e; --tour-panel: #111a16; --tour-muted: rgba(255,255,255,.58); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--tour-gold); outline-offset: 3px; }
+button:active { transform: translateY(1px); }
+.virtual-feature { display: grid; grid-template-columns: .9fr 1.1fr; gap: 8vw; align-items: center; padding: 120px 11vw; background: #e9e6dc; overflow: hidden; }
+.virtual-feature-copy h2 { color: var(--forest); font-size: clamp(48px, 6vw, 86px); margin-bottom: 24px; }
+.virtual-feature-copy > p:not(.eyebrow) { max-width: 420px; color: #68766d; line-height: 1.8; font-size: 14px; }
+.featured-tour-trigger { margin-top: 22px; border: 0; background: var(--forest); color: #fff; padding: 16px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; }
+.featured-tour-trigger span { color: var(--orange); margin-left: 23px; font-size: 16px; }
+.virtual-feature-art { min-height: 490px; position: relative; overflow: hidden; color: #fff; background: linear-gradient(120deg, rgba(9,28,22,.15), rgba(9,28,22,.78)), url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85') center/cover; }
+.virtual-feature-art:after { content: ''; position: absolute; inset: 18px; border: 1px solid rgba(255,255,255,.3); pointer-events: none; }
+.feature-art-label { position: absolute; z-index: 1; left: 35px; bottom: 34px; display: grid; gap: 12px; }
+.feature-art-label span, .feature-art-label small { color: var(--tour-gold); text-transform: uppercase; letter-spacing: .18em; font-size: 9px; }
+.feature-art-label strong { font: 500 clamp(34px, 4vw, 58px)/.92 'Playfair Display', serif; }
+.feature-art-label small { color: rgba(255,255,255,.65); text-transform: none; letter-spacing: .08em; }
+.feature-art-grid { position: absolute; inset: 0; opacity: .28; background: linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.16) 1px, transparent 1px); background-size: 45px 45px; mix-blend-mode: screen; }
+.vtour { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 24px; color: #fff; visibility: hidden; opacity: 0; transition: opacity .3s, visibility .3s; }
+.vtour.is-open { visibility: visible; opacity: 1; }
+.vtour-backdrop { position: absolute; inset: 0; background: rgba(3,9,7,.9); backdrop-filter: blur(10px); }
+.vtour-panel { position: relative; width: min(1360px, 100%); height: min(900px, 94vh); display: grid; grid-template-rows: auto auto 1fr auto; overflow: hidden; background: var(--tour-panel); box-shadow: 0 30px 100px rgba(0,0,0,.5); transform: translateY(18px); transition: transform .4s; }
+.vtour.is-open .vtour-panel { transform: none; }
+.vtour-head { display: flex; justify-content: space-between; gap: 20px; align-items: start; padding: 25px 32px 18px; }
+.vtour-head .eyebrow { margin-bottom: 7px; }
+.vtour-head h2 { margin: 0 0 4px; color: #fff; font-size: clamp(30px, 4vw, 52px); }
+.vtour-head p:last-child { margin: 0; color: var(--tour-muted); font-size: 12px; }
+.vtour-icon { border: 1px solid rgba(255,255,255,.28); background: transparent; color: #fff; min-width: 42px; height: 42px; cursor: pointer; font-size: 21px; }
+.vtour-icon:hover, .vtour-control:hover { border-color: var(--tour-gold); color: var(--tour-gold); }
+.vtour-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 0 32px 15px; border-bottom: 1px solid rgba(255,255,255,.14); }
+.vtour-modes, .vtour-actions { display: flex; gap: 8px; }
+.vtour-control { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.03); color: rgba(255,255,255,.7); padding: 11px 14px; cursor: pointer; text-transform: uppercase; letter-spacing: .12em; font-size: 9px; }
+.vtour-control.active { border-color: var(--tour-gold); background: rgba(216,170,99,.13); color: var(--tour-gold); }
+.vtour-canvas { position: relative; min-height: 0; overflow: hidden; background: #18241f; }
+.vtour-view { position: absolute; inset: 0; display: none; overflow: hidden; }
+.vtour-view.active { display: block; animation: vtour-in .45s ease both; }
+.vtour-loading { position: absolute; z-index: 3; inset: 0; display: grid; place-content: center; gap: 14px; background: #101b16; text-align: center; }
+.vtour-loading strong { font: 500 26px 'Playfair Display', serif; }
+.vtour-loading span { color: var(--tour-gold); text-transform: uppercase; letter-spacing: .17em; font-size: 9px; }
+.vtour-loading:after { content: ''; width: 100px; height: 2px; margin: 4px auto 0; background: linear-gradient(90deg, var(--tour-gold) 65%, rgba(255,255,255,.16) 65%); animation: loading 1.1s ease-in-out infinite; }
+.vtour-scan { display: none; width: 100%; height: 100%; border: 0; }
+.vtour-dollhouse { perspective: 1000px; background: radial-gradient(circle at 50% 37%, rgba(216,170,99,.15), transparent 36%), #17241e; cursor: grab; }
+.vtour-dollhouse:active { cursor: grabbing; }
+.dollhouse-model { position: absolute; left: 50%; top: 50%; width: min(70vw, 720px); aspect-ratio: 1.35; transform: translate(-50%,-50%) rotateX(55deg) rotateZ(-24deg); transform-style: preserve-3d; transition: transform .15s linear; }
+.doll-floor { position: absolute; inset: 0; transform-style: preserve-3d; background: rgba(197,208,196,.85); border: 2px solid var(--tour-gold); box-shadow: 0 30px 0 rgba(0,0,0,.22); }
+.doll-floor.one { transform: translateZ(0); background: linear-gradient(90deg, rgba(183,194,181,.9) 49.5%, rgba(10,16,14,.8) 50%), linear-gradient(rgba(255,255,255,.2) 49.5%, rgba(10,16,14,.8) 50%); background-size: 100% 100%, 100% 100%; }
+.doll-floor.two { transform: translateZ(58px) scale(.86); background: rgba(226,224,209,.9); }
+.doll-room { position: absolute; display: grid; place-items: center; border: 1px solid rgba(20,43,34,.55); color: #173328; background: rgba(247,241,222,.72); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; cursor: pointer; }
+.doll-room:hover { background: var(--tour-gold); }
+.doll-room.living { inset: 12% 45% 52% 8%; }.doll-room.kitchen { inset: 12% 8% 52% 56%; }.doll-room.bed { inset: 57% 45% 8% 8%; }.doll-room.bath { inset: 57% 8% 8% 56%; }
+.dollhouse-caption, .plan-caption, .walk-caption { position: absolute; z-index: 2; left: 26px; bottom: 25px; display: grid; gap: 7px; padding: 14px 17px; background: rgba(7,17,13,.78); backdrop-filter: blur(8px); }
+.dollhouse-caption span, .plan-caption span, .walk-caption span { color: var(--tour-gold); text-transform: uppercase; letter-spacing: .15em; font-size: 9px; }.dollhouse-caption strong, .plan-caption strong, .walk-caption strong { font: 500 22px 'Playfair Display', serif; }
+.vtour-plan { padding: 35px; background: #ebe8dd; color: var(--forest); }
+.plan-floor { width: min(760px, 82%); height: 72%; margin: auto; position: relative; border: 10px solid #758979; background: #f8f5eb; box-shadow: 0 18px 50px rgba(15,37,28,.15); }
+.plan-room { position: absolute; display: grid; place-items: center; border: 1px solid #8a9a8c; background: rgba(218,222,205,.65); color: #284536; cursor: pointer; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; }.plan-room:hover { background: var(--tour-gold); color: #14271d; }.plan-living { inset: 5% 45% 48% 5%; }.plan-kitchen { inset: 5% 5% 48% 55%; }.plan-master { inset: 53% 45% 5% 5%; }.plan-bath { inset: 53% 5% 5% 55%; }.plan-terrace { position: absolute; right: -70px; top: 25%; bottom: 25%; width: 60px; display: grid; place-items: center; writing-mode: vertical-rl; background: #b6c5ad; color: #31543e; font-size: 9px; letter-spacing: .1em; }
+.vtour-walk { background-position: center; background-size: cover; background-image: linear-gradient(90deg, rgba(7,22,16,.66), transparent 65%), url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=88'); touch-action: none; cursor: grab; }.vtour-walk:active { cursor: grabbing; }.walk-image { position: absolute; inset: 0; background: inherit; transform: scale(1.08); transition: transform .2s ease; }.walk-hotspot { position: absolute; z-index: 2; width: 48px; height: 48px; border: 1px solid #fff; border-radius: 50%; background: var(--tour-gold); color: #12251c; cursor: pointer; box-shadow: 0 0 0 8px rgba(216,170,99,.2); }.walk-hotspot:hover { transform: scale(1.12); }.walk-hotspot.next-room { left: 61%; top: 52%; }.walk-hotspot.outside { left: 28%; top: 47%; }.walk-hotspot.bedroom { left: 78%; top: 36%; }
+.vtour-floorbar { position: absolute; z-index: 4; right: 25px; top: 25px; display: flex; flex-direction: column; gap: 5px; padding: 6px; background: rgba(7,17,13,.78); }.vtour-floorbar button { border: 0; background: transparent; color: rgba(255,255,255,.7); padding: 9px 11px; cursor: pointer; text-transform: uppercase; font-size: 9px; letter-spacing: .1em; }.vtour-floorbar button.active { background: var(--tour-gold); color: #15261d; }
+.vtour-booking { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; padding: 16px 32px 19px; background: #0d1512; }.vtour-booking label { display: grid; gap: 6px; color: var(--tour-muted); text-transform: uppercase; letter-spacing: .12em; font-size: 8px; }.vtour-booking input, .vtour-booking select { min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.05); color: #fff; padding: 11px; outline: none; }.vtour-booking option { color: #111; }.vtour-booking button { border: 0; background: var(--tour-gold); color: #17271e; padding: 13px 18px; cursor: pointer; text-transform: uppercase; letter-spacing: .14em; font-size: 9px; white-space: nowrap; }.vtour-booking-message { position: absolute; right: 32px; bottom: 76px; color: var(--tour-gold); font-size: 11px; }
+.vtour-menu { position: absolute; z-index: 8; right: 32px; top: 73px; display: none; padding: 10px; background: #f4f0e5; color: var(--forest); box-shadow: 0 12px 30px rgba(0,0,0,.3); }.vtour-menu.open { display: grid; gap: 5px; }.vtour-menu button { border: 0; background: transparent; color: inherit; padding: 8px 14px; cursor: pointer; text-align: left; font-size: 11px; }
+@keyframes vtour-in { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } } @keyframes loading { 0%,100% { opacity: .4; transform: scaleX(.65); } 50% { opacity: 1; transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+@media (max-width: 760px) { .virtual-feature { display: block; padding: 78px 22px; }.virtual-feature-art { min-height: 380px; margin-top: 45px; }.vtour { padding: 0; }.vtour-panel { width: 100%; height: 100%; min-height: 100%; grid-template-rows: auto auto 1fr auto; }.vtour-head { padding: 20px 18px 14px; }.vtour-head h2 { font-size: 32px; }.vtour-toolbar { padding: 0 18px 11px; overflow-x: auto; align-items: center; }.vtour-modes, .vtour-actions { flex-shrink: 0; }.vtour-control { padding: 11px 10px; font-size: 8px; }.vtour-canvas { min-height: 0; }.dollhouse-model { width: 88vw; }.vtour-plan { padding: 20px; }.plan-floor { width: 82%; height: 55%; }.plan-terrace { right: -45px; width: 40px; }.dollhouse-caption, .plan-caption, .walk-caption { left: 18px; bottom: 18px; }.vtour-floorbar { right: 14px; top: 14px; }.vtour-booking { grid-template-columns: 1fr 1fr; padding: 13px 18px 16px; }.vtour-booking button { grid-column: 1 / -1; width: 100%; }.vtour-booking-message { right: 18px; bottom: 104px; }.vtour-menu { right: 18px; top: 116px; } }
