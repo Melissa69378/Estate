@@ -22,18 +22,24 @@ if (databaseUrl) {
 }
 
 const seedProperties = [
-  ['Hôtel Particulier Champ-de-Mars', 'Paris 7e · Avenue Émile-Deschanel', '9,85 M€', 'Hôtel particulier', 9, 385, 5, '2.2982,48.8558', 'image-one', 'A', 48, 'A', 9, '24 500 € / mois', true],
-  ['Villa Belle Époque "Le Roc Fleuri"', 'Nice · Boulevard Carnot, Cap de Nice', '6,90 M€', 'Villa', 8, 320, 5, '7.2915,43.6890', 'image-two', 'B', 82, 'B', 16, '18 000 € / mois', true],
-  ['Château & Vignoble de Saint-Émilion', 'Saint-Émilion · Route des Châteaux, Gironde', '4,45 M€', 'Château', 12, 540, 7, '-0.1558,44.8943', 'image-three', 'C', 135, 'C', 28, '14 000 € / mois', true],
-  ['Appartement de Réception Place des Vosges', 'Paris 4e · Place des Vosges, Le Marais', '4,85 M€', 'Appartement', 5, 195, 3, '2.3662,48.8555', 'image-four', 'B', 78, 'A', 8, '12 500 € / mois', true],
-  ['Bastide Provençale en Pierre du Luberon', 'Gordes · Chemin des Bories, Luberon', '3,75 M€', 'Maison', 7, 290, 4, '5.2001,43.9126', 'image-five', 'C', 122, 'B', 19, '9 500 € / mois', true],
-  ['Chalet d\'Alpage "Le Grand Cerf"', 'Megève · Route du Mont-d\'Arbois, Haute-Savoie', '7,80 M€', 'Chalet', 8, 340, 5, '6.6342,45.8569', 'image-six', 'B', 88, 'B', 18, '22 000 € / mois', true],
-  ['Manoir Anglo-Normand du Triangle d\'Or', 'Deauville · Avenue de la République, Calvados', '2,15 M€', 'Manoir', 8, 260, 5, '0.0750,49.3592', 'image-seven', 'D', 188, 'C', 29, '6 800 € / mois', true],
-  ['Penthouse Panoramique Parc Tête d\'Or', 'Lyon 6e · Boulevard des Belges, Rhône', '2,65 M€', 'Appartement', 6, 215, 4, '4.8512,45.7725', 'image-eight', 'B', 72, 'A', 7, '7 500 € / mois', true],
-  ['Maison de Maître & Pavillon d\'Amis', 'Biarritz · Avenue de l\'Impératrice, Le Phare', '3,90 M€', 'Maison', 9, 310, 6, '-1.5540,43.4905', 'image-nine', 'C', 118, 'B', 22, '11 000 € / mois', true],
-  ['Hôtel Particulier du Quartier Mazarin', 'Aix-en-Provence · Rue Cardinale, Bouches-du-Rhône', '3,20 M€', 'Hôtel particulier', 7, 275, 4, '5.4497,43.5246', 'image-ten', 'C', 130, 'C', 25, '8 900 € / mois', true],
-  ['Villa d\'Architecte en Cèdre & Accès Bassin', 'Lège-Cap-Ferret · Boulevard de la Plage, Gironde', '4,20 M€', 'Villa', 7, 230, 4, '-1.2464,44.6291', 'image-eleven', 'A', 42, 'A', 5, '13 500 € / mois', true],
-  ['Manoir Breton des Marais & Dépendances', 'Guérande · Presqu\'île Guérandaise, Loire-Atlantique', '1,89 M€', 'Manoir', 10, 350, 6, '-2.4285,47.3283', 'image-twelve', 'D', 195, 'D', 38, '5 500 € / mois', true],
+  ['Hôtel Particulier Champ-de-Mars', 'Paris 7e · Avenue Émile-Deschanel', '9,85 M€', 'Hôtel particulier', 9, 385, 5, '2.3017,48.8559', 'image-one', 'A', 48, 'A', 9, '24 500 € / mois', true, 'Île-de-France', 'Paris (75)', 'Paris', '75007', 'Avenue Émile Deschanel'],
+  ['Villa Belle Époque "Le Roc Fleuri"', 'Nice · Boulevard Carnot, Cap de Nice', '6,90 M€', 'Villa', 8, 320, 5, '7.2915,43.6890', 'image-two', 'B', 82, 'B', 16, '18 000 € / mois', true, 'Provence-Alpes-Côte d\'Azur', 'Alpes-Maritimes (06)', 'Nice', '06300', 'Boulevard Carnot'],
+  ['Château & Vignoble de Saint-Émilion', 'Saint-Émilion · Route des Châteaux, Gironde', '4,45 M€', 'Château', 12, 540, 7, '-0.1558,44.8943', 'image-three', 'C', 135, 'C', 28, '14 000 € / mois', true, 'Nouvelle-Aquitaine', 'Gironde (33)', 'Saint-Émilion', '33330', 'Route des Châteaux'],
+  ['Appartement de Réception Place des Vosges', 'Paris 4e · Place des Vosges, Le Marais', '4,85 M€', 'Appartement', 5, 195, 3, '2.3662,48.8555', 'image-four', 'B', 78, 'A', 8, '12 500 € / mois', true, 'Île-de-France', 'Paris (75)', 'Paris', '75004', 'Place des Vosges'],
+  ['Bastide Provençale en Pierre du Luberon', 'Gordes · Chemin des Bories, Luberon', '3,75 M€', 'Maison', 7, 290, 4, '5.2001,43.9126', 'image-five', 'C', 122, 'B', 19, '9 500 € / mois', true, 'Provence-Alpes-Côte d\'Azur', 'Vaucluse (84)', 'Gordes', '84220', 'Chemin des Bories'],
+  ['Chalet d\'Alpage "Le Grand Cerf"', 'Megève · Route du Mont-d\'Arbois, Haute-Savoie', '7,80 M€', 'Chalet', 8, 340, 5, '6.6342,45.8569', 'image-six', 'B', 88, 'B', 18, '22 000 € / mois', true, 'Auvergne-Rhône-Alpes', 'Haute-Savoie (74)', 'Megève', '74120', 'Route du Mont-d\'Arbois'],
+  ['Manoir Anglo-Normand du Triangle d\'Or', 'Deauville · Avenue de la République, Calvados', '2,15 M€', 'Manoir', 8, 260, 5, '0.0750,49.3592', 'image-seven', 'D', 188, 'C', 29, '6 800 € / mois', true, 'Normandie', 'Calvados (14)', 'Deauville', '14800', 'Avenue de la République'],
+  ['Penthouse Panoramique Parc Tête d\'Or', 'Lyon 6e · Boulevard des Belges, Rhône', '2,65 M€', 'Appartement', 6, 215, 4, '4.8512,45.7725', 'image-eight', 'B', 72, 'A', 7, '7 500 € / mois', true, 'Auvergne-Rhône-Alpes', 'Rhône (69)', 'Lyon', '69006', 'Boulevard des Belges'],
+  ['Maison de Maître & Pavillon d\'Amis', 'Biarritz · Avenue de l\'Impératrice, Le Phare', '3,90 M€', 'Maison', 9, 310, 6, '-1.5540,43.4905', 'image-nine', 'C', 118, 'B', 22, '11 000 € / mois', true, 'Nouvelle-Aquitaine', 'Pyrénées-Atlantiques (64)', 'Biarritz', '64200', 'Avenue de l\'Impératrice'],
+  ['Hôtel Particulier du Quartier Mazarin', 'Aix-en-Provence · Rue Cardinale, Bouches-du-Rhône', '3,20 M€', 'Hôtel particulier', 7, 275, 4, '5.4497,43.5246', 'image-ten', 'C', 130, 'C', 25, '8 900 € / mois', true, 'Provence-Alpes-Côte d\'Azur', 'Bouches-du-Rhône (13)', 'Aix-en-Provence', '13100', 'Rue Cardinale'],
+  ['Villa d\'Architecte en Cèdre & Accès Bassin', 'Lège-Cap-Ferret · Boulevard de la Plage, Gironde', '4,20 M€', 'Villa', 7, 230, 4, '-1.2464,44.6291', 'image-eleven', 'A', 42, 'A', 5, '13 500 € / mois', true, 'Nouvelle-Aquitaine', 'Gironde (33)', 'Lège-Cap-Ferret', '33970', 'Boulevard de la Plage'],
+  ['Manoir Breton des Marais & Dépendances', 'Guérande · Presqu\'île Guérandaise, Loire-Atlantique', '1,89 M€', 'Manoir', 10, 350, 6, '-2.4285,47.3283', 'image-twelve', 'D', 195, 'D', 38, '5 500 € / mois', true, 'Pays de la Loire', 'Loire-Atlantique (44)', 'Guérande', '44350', 'Place Sainte-Anne'],
+  ['Manoir en Granit Face Mer & Crique Privée', 'Dinard · Pointe de la Malouine, Ille-et-Vilaine', '3,45 M€', 'Manoir', 9, 320, 5, '-2.0543,48.6329', 'image-seven', 'C', 128, 'B', 20, '9 800 € / mois', true, 'Bretagne', 'Ille-et-Vilaine (35)', 'Dinard', '35800', 'Pointe de la Malouine'],
+  ['Mas Méditerranéen & Oliveraie Séculaire', 'Uzès · Vallée de l\'Eure, Gard', '2,75 M€', 'Maison', 8, 285, 5, '4.4194,44.0122', 'image-five', 'B', 79, 'A', 7, '8 200 € / mois', true, 'Occitanie', 'Gard (30)', 'Uzès', '30700', 'Vallée de l\'Eure'],
+  ['Propriété Privée Vue Mer & Piscine Infini', 'Cannes · La Californie, Alpes-Maritimes', '8,20 M€', 'Villa', 9, 390, 6, '7.0422,43.5518', 'image-two', 'A', 45, 'A', 6, '25 000 € / mois', true, 'Provence-Alpes-Côte d\'Azur', 'Alpes-Maritimes (06)', 'Cannes', '06400', 'Avenue Fiesole'],
+  ['Villa Contemporaine Bord de Lac & Ponton', 'Annecy · Veyrier-du-Lac, Haute-Savoie', '4,90 M€', 'Villa', 7, 280, 4, '6.1822,45.8825', 'image-six', 'B', 68, 'A', 6, '14 500 € / mois', true, 'Auvergne-Rhône-Alpes', 'Haute-Savoie (74)', 'Annecy', '74290', 'Route d\'Annecy'],
+  ['Hôtel Particulier des Chartrons & Jardin d\'Hiver', 'Bordeaux · Cours Xavier-Arnozan, Gironde', '3,10 M€', 'Hôtel particulier', 8, 315, 4, '-0.5735,44.8510', 'image-one', 'C', 115, 'B', 18, '8 800 € / mois', true, 'Nouvelle-Aquitaine', 'Gironde (33)', 'Bordeaux', '33000', 'Cours Xavier-Arnozan'],
+  ['Villa d\'Exception Parc de Saint-Cloud', 'Saint-Cloud · Montretout, Hauts-de-Seine', '5,40 M€', 'Villa', 8, 330, 5, '2.2155,48.8475', 'image-four', 'B', 85, 'A', 8, '15 000 € / mois', true, 'Île-de-France', 'Hauts-de-Seine (92)', 'Saint-Cloud', '92210', 'Boulevard de la République'],
 ];
 
 const laforetAgencies = [
@@ -237,11 +243,53 @@ let inMemoryProperties = seedProperties.map((p, index) => ({
   ges_value: p[12] || 15,
   rent_price: p[13] || '8 000 € / mois',
   favoriz: p[14] !== false,
+  region: p[15] || 'Île-de-France',
+  department: p[16] || 'France',
+  city: p[17] || 'Paris',
+  postal_code: p[18] || '75000',
+  address: p[19] || p[1],
   status: 'published',
   tour: true,
   created_at: new Date(Date.now() - (seedProperties.length - index) * 3600000).toISOString(),
   updated_at: new Date().toISOString(),
 }));
+
+const franceRegions = [
+  { id: 'all', name: 'Toute la France', center: [2.2137, 46.2276], zoom: 5.5, departments: [] },
+  { id: 'ile-de-france', name: 'Île-de-France', center: [2.3522, 48.8566], zoom: 10, departments: ['Paris (75)', 'Hauts-de-Seine (92)'] },
+  { id: 'paca', name: 'Provence-Alpes-Côte d\'Azur', center: [6.1286, 43.8352], zoom: 8, departments: ['Alpes-Maritimes (06)', 'Vaucluse (84)', 'Bouches-du-Rhône (13)'] },
+  { id: 'nouvelle-aquitaine', name: 'Nouvelle-Aquitaine', center: [-0.5792, 44.8378], zoom: 8, departments: ['Gironde (33)', 'Pyrénées-Atlantiques (64)'] },
+  { id: 'auvergne-rhone-alpes', name: 'Auvergne-Rhône-Alpes', center: [5.3698, 45.7640], zoom: 8, departments: ['Rhône (69)', 'Haute-Savoie (74)'] },
+  { id: 'normandie', name: 'Normandie', center: [0.1807, 49.2583], zoom: 9, departments: ['Calvados (14)'] },
+  { id: 'pays-de-la-loire', name: 'Pays de la Loire', center: [-1.7500, 47.3500], zoom: 9, departments: ['Loire-Atlantique (44)'] },
+  { id: 'bretagne', name: 'Bretagne', center: [-2.0543, 48.6329], zoom: 9, departments: ['Ille-et-Vilaine (35)'] },
+  { id: 'occitanie', name: 'Occitanie', center: [4.4194, 44.0122], zoom: 9, departments: ['Gard (30)'] },
+];
+
+async function fetchFrenchRealtimeLocation(addressQuery) {
+  try {
+    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(addressQuery)}&limit=1`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.features?.length) {
+      const feat = data.features[0];
+      return {
+        label: feat.properties.label,
+        coordinates: `${feat.geometry.coordinates[0].toFixed(5)},${feat.geometry.coordinates[1].toFixed(5)}`,
+        city: feat.properties.city,
+        postcode: feat.properties.postcode,
+        context: feat.properties.context,
+        score: feat.properties.score,
+      };
+    }
+  } catch (err) {
+    // Network or timeout graceful fallback
+  }
+  return null;
+}
 
 let inMemoryContent = {
   title: 'Des adresses d\'exception qui vous ressemblent.',
@@ -327,7 +375,18 @@ function parseBody(request) {
 }
 
 function propertyResponse(row) {
-  return { ...row, tour: Boolean(row.tour) };
+  return {
+    ...row,
+    tour: Boolean(row.tour),
+    region: row.region || 'Île-de-France',
+    department: row.department || 'France',
+    city: row.city || 'Paris',
+    postalCode: row.postal_code || row.postalCode || '75000',
+    postal_code: row.postal_code || row.postalCode || '75000',
+    address: row.address || row.location,
+    rent_price: row.rent_price || row.rentPrice || '8 000 € / mois',
+    favoriz: row.favoriz !== false,
+  };
 }
 
 async function handleApi(request, response, url) {
@@ -337,16 +396,35 @@ async function handleApi(request, response, url) {
 
   if (request.method === 'GET' && url.pathname === '/api/properties') {
     const status = url.searchParams.get('status');
+    const region = (url.searchParams.get('region') || '').trim().toLowerCase();
+    const query = (url.searchParams.get('q') || '').trim().toLowerCase();
+    let properties = inMemoryProperties;
     if (pool) {
       try {
-        const result = status ? await pool.query('SELECT * FROM properties WHERE status = $1 ORDER BY created_at ASC', [status]) : await pool.query('SELECT * FROM properties ORDER BY created_at ASC');
-        return sendJson(response, 200, result.rows.map(propertyResponse));
+        const result = status ? await pool.query('SELECT * FROM properties WHERE status = $1 ORDER BY id ASC', [status]) : await pool.query('SELECT * FROM properties ORDER BY id ASC');
+        if (result.rows.length > 0) properties = result.rows.map(propertyResponse);
       } catch (err) {
         console.warn('Postgres query error, using in-memory store:', err.message);
       }
     }
-    const filtered = status ? inMemoryProperties.filter((p) => p.status === status) : inMemoryProperties;
-    return sendJson(response, 200, filtered.map(propertyResponse));
+    if (status) {
+      properties = properties.filter((p) => p.status === status);
+    }
+    if (region && region !== 'all' && region !== 'toute la france') {
+      properties = properties.filter((p) => (p.region || '').toLowerCase() === region);
+    }
+    if (query) {
+      properties = properties.filter((p) =>
+        (p.name && p.name.toLowerCase().includes(query)) ||
+        (p.location && p.location.toLowerCase().includes(query)) ||
+        (p.city && p.city.toLowerCase().includes(query)) ||
+        (p.region && p.region.toLowerCase().includes(query)) ||
+        (p.department && p.department.toLowerCase().includes(query)) ||
+        (p.postal_code && p.postal_code.includes(query)) ||
+        (p.address && p.address.toLowerCase().includes(query))
+      );
+    }
+    return sendJson(response, 200, properties.map(propertyResponse));
   }
 
   if (request.method === 'GET' && url.pathname === '/api/content/homepage') {
@@ -531,6 +609,100 @@ async function handleApi(request, response, url) {
       total: agencies.length,
       networkTotal: 720,
       agencies,
+    });
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/regions') {
+    const list = franceRegions.map((r) => {
+      const count = r.id === 'all'
+        ? inMemoryProperties.length
+        : inMemoryProperties.filter((p) => (p.region || '').toLowerCase() === r.name.toLowerCase()).length;
+      return {
+        id: r.id,
+        name: r.name,
+        count,
+        center: r.center,
+        zoom: r.zoom,
+        departments: r.departments,
+      };
+    });
+    return sendJson(response, 200, { regions: list });
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/locations/autocomplete') {
+    const q = (url.searchParams.get('q') || '').trim();
+    if (!q || q.length < 2) {
+      return sendJson(response, 200, { results: [] });
+    }
+
+    const qLower = q.toLowerCase();
+    const regionMatches = franceRegions
+      .filter((r) => r.id !== 'all' && (r.name.toLowerCase().includes(qLower) || r.departments.some((d) => d.toLowerCase().includes(qLower))))
+      .map((r) => ({
+        type: 'region',
+        label: `${r.name} (Région)`,
+        name: r.name,
+        region: r.name,
+        coordinates: `${r.center[0]},${r.center[1]}`,
+      }));
+
+    let banResults = [];
+    try {
+      const banRes = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(q)}&limit=5&type=municipality`, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(2500),
+      });
+      if (banRes.ok) {
+        const banData = await banRes.json();
+        if (banData?.features) {
+          banResults = banData.features.map((f) => ({
+            type: 'city',
+            label: `${f.properties.name} (${f.properties.postcode}) · ${f.properties.context || ''}`,
+            city: f.properties.city || f.properties.name,
+            postcode: f.properties.postcode,
+            context: f.properties.context,
+            region: f.properties.context ? f.properties.context.split(',')[2]?.trim() : '',
+            department: f.properties.context ? f.properties.context.split(',')[1]?.trim() : '',
+            coordinates: `${f.geometry.coordinates[0].toFixed(5)},${f.geometry.coordinates[1].toFixed(5)}`,
+          }));
+        }
+      }
+    } catch (err) {
+      // Graceful fallback
+    }
+
+    return sendJson(response, 200, {
+      results: [...regionMatches, ...banResults],
+    });
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/locations/geocode') {
+    const body = await parseBody(request);
+    const query = String(body.query || body.address || '').trim();
+    if (!query) return sendJson(response, 400, { error: 'Query is required.' });
+    const location = await fetchFrenchRealtimeLocation(query);
+    if (!location) {
+      return sendJson(response, 404, { error: 'Location not found in French national address database.' });
+    }
+    return sendJson(response, 200, location);
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/properties/sync-locations') {
+    let updatedCount = 0;
+    for (const prop of inMemoryProperties) {
+      const searchTarget = `${prop.address || prop.name}, ${prop.city}, France`;
+      const liveLoc = await fetchFrenchRealtimeLocation(searchTarget);
+      if (liveLoc) {
+        prop.coordinates = liveLoc.coordinates;
+        prop.realtime_location = liveLoc;
+        updatedCount++;
+      }
+    }
+    return sendJson(response, 200, {
+      success: true,
+      updatedCount,
+      totalProperties: inMemoryProperties.length,
+      message: `${updatedCount} propriétés synchronisées avec la Base Adresse Nationale en temps réel.`,
     });
   }
 

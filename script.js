@@ -147,6 +147,50 @@
     });
   }
 
+  let selectedPropertyRegion = 'all';
+  let userCoordinates = null; // [lng, lat]
+  let userLocationLabel = '';
+  let franceMap = null;
+  let franceMarkers = [];
+  let userMapMarker = null;
+  let franceRegionsList = [];
+
+  function calculateHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round(R * c);
+  }
+
+  function updatePropertyDistances(userLat, userLng, label) {
+    const cards = document.querySelectorAll('.property-card');
+    cards.forEach((card) => {
+      const coordsStr = card.dataset.coordinates;
+      if (!coordsStr) return;
+      const [propLng, propLat] = coordsStr.split(',').map(Number);
+      if (isNaN(propLng) || isNaN(propLat)) return;
+
+      const dist = calculateHaversineDistanceKm(userLat, userLng, propLat, propLng);
+      card.dataset.distance = dist;
+
+      const distBadge = card.querySelector('.property-distance-badge');
+      if (distBadge) {
+        distBadge.textContent = `🚗 À ${dist} km`;
+        distBadge.hidden = false;
+      }
+    });
+
+    const statusIndicator = document.querySelector('#listing-user-dist');
+    if (statusIndicator) {
+      statusIndicator.textContent = ` · 📍 Proche de ${label}`;
+      statusIndicator.hidden = false;
+    }
+  }
+
   async function syncPublicCatalog() {
     const grid = document.querySelector('.property-grid');
     if (!grid) return;
@@ -184,13 +228,20 @@
       const hasTour = property.tour === true || Boolean(property.tourUrl);
       const tourBtn = hasTour ? `<button class="tour-trigger" type="button" aria-label="Explore ${name} in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button>` : '';
 
+      const region = escapeHtml(property.region || 'Île-de-France');
+      const department = escapeHtml(property.department || 'France');
+      const city = escapeHtml(property.city || 'Paris');
+      const postalCode = escapeHtml(property.postalCode || property.postal_code || '75000');
+      const address = escapeHtml(property.address || location);
+      const coordinates = escapeHtml(property.coordinates || '2.3522,48.8566');
+
       return `
         <article class="property-card" 
           data-id="${property.id || index + 1}" 
           data-type="${type}" 
           data-property="${name}" 
           data-location="${location}" 
-          data-coordinates="${escapeHtml(property.coordinates || '2.3522,48.8566')}" 
+          data-coordinates="${coordinates}" 
           data-price="${price}"
           data-numeric-price="${numericPrice}"
           data-rent-price="${rentPrice}"
@@ -198,7 +249,12 @@
           data-rooms="${rooms}"
           data-dpe="${dpe}"
           data-favoriz="${favoriz}"
-          data-has-tour="${hasTour}">
+          data-has-tour="${hasTour}"
+          data-region="${region}"
+          data-department="${department}"
+          data-city="${city}"
+          data-postal-code="${postalCode}"
+          data-address="${address}">
           <div class="property-image ${image}">
             <span>${isRent ? 'À louer' : 'À vendre'}</span>
             <button class="property-favorite" type="button" aria-label="Ajouter ${name} aux favoris" aria-pressed="false">♡</button>
@@ -207,6 +263,9 @@
             <div class="property-badges-row">
               ${favoriz ? '<span class="favoriz-badge">★ Mandat Favoriz</span>' : ''}
               <span class="dpe-pill dpe-${dpe.toLowerCase()}">DPE ${dpe}</span>
+              <span class="property-region-badge">📍 ${region} · ${city}</span>
+              <span class="property-ban-verified" title="Localisation certifiée Base Adresse Nationale">✓ BAN</span>
+              <span class="property-distance-badge" hidden></span>
             </div>
             <p>${type} · ${location}</p>
             <h3>${name}</h3>
@@ -226,10 +285,14 @@
         </article>
       `;
     }).join('');
+
+    if (userCoordinates) {
+      updatePropertyDistances(userCoordinates[1], userCoordinates[0], userLocationLabel || 'Position');
+    }
   }
 
   function filterListings() {
-    const searchInput = searchForm ? searchForm.querySelector('input') : document.querySelector('.search-form input');
+    const searchInput = document.querySelector('#location-input') || searchForm?.querySelector('input');
     const searchSelect = searchForm ? searchForm.querySelector('select') : document.querySelector('.search-form select');
     const maxPriceSelect = document.querySelector('#filter-max-price');
     const minSurfaceSelect = document.querySelector('#filter-min-surface');
@@ -254,13 +317,24 @@
       const cardType = (card.dataset.type || '').toLowerCase();
       const cardName = (card.dataset.property || '').toLowerCase();
       const cardLoc = (card.dataset.location || '').toLowerCase();
+      const cardCity = (card.dataset.city || '').toLowerCase();
+      const cardDept = (card.dataset.department || '').toLowerCase();
+      const cardRegion = (card.dataset.region || '').toLowerCase();
+      const cardPostal = (card.dataset.postalCode || '').toLowerCase();
       const cardPrice = Number(card.dataset.numericPrice || 0);
       const cardArea = Number(card.dataset.area || 0);
       const cardDpe = (card.dataset.dpe || '').toUpperCase();
       const cardFavoriz = card.dataset.favoriz === 'true';
       const cardHasTour = card.dataset.hasTour === 'true';
 
-      const matchesLocation = !query || `${cardName} ${cardLoc}`.includes(query);
+      const matchesRegion = selectedPropertyRegion === 'all' || 
+        cardRegion === selectedPropertyRegion.toLowerCase() ||
+        cardRegion.includes(selectedPropertyRegion.toLowerCase()) ||
+        selectedPropertyRegion.toLowerCase().includes(cardRegion);
+
+      const matchesLocation = !query || 
+        `${cardName} ${cardLoc} ${cardCity} ${cardDept} ${cardRegion} ${cardPostal}`.includes(query);
+
       const matchesType = !selectedType || selectedType.includes('tous') || cardType.includes(cleanType) || cleanType.includes(cardType);
       const matchesPrice = isNaN(cardPrice) || cardPrice <= maxPriceVal;
       const matchesSurface = cardArea >= minSurfaceVal;
@@ -273,7 +347,7 @@
       const matchesTour = !tourOnly || cardHasTour;
       const matchesFavoriz = !favorizOnly || cardFavoriz;
 
-      const visible = matchesLocation && matchesType && matchesPrice && matchesSurface && matchesDpe && matchesTour && matchesFavoriz;
+      const visible = matchesRegion && matchesLocation && matchesType && matchesPrice && matchesSurface && matchesDpe && matchesTour && matchesFavoriz;
       card.hidden = !visible;
       if (visible) visibleCount += 1;
     });
@@ -282,6 +356,11 @@
     const emptyState = document.querySelector('.listing-empty');
     if (countNode) countNode.textContent = `${visibleCount} bien${visibleCount > 1 ? 's' : ''}`;
     if (emptyState) emptyState.hidden = visibleCount > 0;
+
+    const mapPanel = document.querySelector('#france-map-view');
+    if (mapPanel && !mapPanel.hidden) {
+      updateFranceMapMarkers();
+    }
   }
 
   function priceInMillions(price) {
@@ -297,6 +376,11 @@
     const sort = document.querySelector('#listing-sort')?.value ?? 'featured';
     const cards = [...grid.querySelectorAll('.property-card')];
     cards.sort((first, second) => {
+      if (sort === 'distance') {
+        const distA = first.dataset.distance ? Number(first.dataset.distance) : 999999;
+        const distB = second.dataset.distance ? Number(second.dataset.distance) : 999999;
+        if (distA !== distB) return distA - distB;
+      }
       if (sort === 'featured') {
         const firstFav = first.dataset.favoriz === 'true' ? 1 : 0;
         const secondFav = second.dataset.favoriz === 'true' ? 1 : 0;
@@ -306,6 +390,9 @@
       if (sort === 'price-low' || sort === 'price-high') {
         const difference = Number(first.dataset.numericPrice || 0) - Number(second.dataset.numericPrice || 0);
         return sort === 'price-low' ? difference : -difference;
+      }
+      if (sort === 'area') {
+        return Number(second.dataset.area || 0) - Number(first.dataset.area || 0);
       }
       if (sort === 'name') return first.dataset.property.localeCompare(second.dataset.property, 'fr');
       return Number(first.dataset.index || 0) - Number(second.dataset.index || 0);
@@ -345,10 +432,460 @@
     if (listingSort) listingSort.addEventListener('change', sortListings);
   }
 
+  // -------------------------------------------------------------
+  // FRANCE REGIONS & REAL-TIME BAN LOCATION MODULE
+  // -------------------------------------------------------------
+  async function initFranceRegions() {
+    try {
+      const data = await apiRequest('/api/regions');
+      if (Array.isArray(data)) {
+        franceRegionsList = data;
+        updateRegionChipsCounts(data);
+      }
+    } catch (e) {
+      console.warn('Could not load regions metadata:', e);
+    }
+
+    const regionChips = document.querySelectorAll('.region-chip');
+    regionChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        regionChips.forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        selectedPropertyRegion = chip.dataset.region || 'all';
+
+        const regionBadge = document.querySelector('#listing-region-badge');
+        if (regionBadge) {
+          if (selectedPropertyRegion === 'all') {
+            regionBadge.textContent = '';
+          } else {
+            regionBadge.textContent = ` · ${chip.textContent.replace(/\(\d+\)/g, '').trim()}`;
+          }
+        }
+
+        filterListings();
+
+        // If map is open, fly to region center if available
+        if (franceMap && selectedPropertyRegion !== 'all') {
+          const regObj = franceRegionsList.find((r) => r.name.toLowerCase() === selectedPropertyRegion.toLowerCase());
+          if (regObj && regObj.center) {
+            franceMap.flyTo({ center: regObj.center, zoom: 7.5, duration: 1200 });
+          }
+        }
+      });
+    });
+  }
+
+  function updateRegionChipsCounts(regions) {
+    const regionMap = new Map();
+    let totalCount = 0;
+    regions.forEach((r) => {
+      regionMap.set(r.name.toLowerCase(), r.count || 0);
+      totalCount += (r.count || 0);
+    });
+
+    document.querySelectorAll('.region-chip').forEach((chip) => {
+      const reg = chip.dataset.region;
+      const countEl = chip.querySelector('.chip-count');
+      if (countEl) {
+        if (reg === 'all') {
+          countEl.textContent = `(${totalCount})`;
+        } else {
+          const count = regionMap.get(reg.toLowerCase()) || 0;
+          countEl.textContent = `(${count})`;
+        }
+      }
+    });
+  }
+
+  function initLocationSearch() {
+    const locationInput = document.querySelector('#location-input');
+    const suggestionsBox = document.querySelector('#location-suggestions-box');
+    const geoBtn = document.querySelector('#btn-geo-detect');
+    let debounceTimer = null;
+
+    if (locationInput && suggestionsBox) {
+      locationInput.addEventListener('input', () => {
+        const query = locationInput.value.trim();
+        if (debounceTimer) clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+          suggestionsBox.hidden = true;
+          suggestionsBox.innerHTML = '';
+          filterListings();
+          return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+          try {
+            const data = await apiRequest(`/api/locations/autocomplete?q=${encodeURIComponent(query)}`);
+            renderSuggestions(data);
+          } catch (err) {
+            suggestionsBox.hidden = true;
+          }
+        }, 220);
+      });
+
+      locationInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          suggestionsBox.hidden = true;
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.location-search-field')) {
+          suggestionsBox.hidden = true;
+        }
+      });
+    }
+
+    function renderSuggestions(data) {
+      if (!suggestionsBox) return;
+      const regions = data.regions || [];
+      const locations = data.locations || [];
+
+      if (!regions.length && !locations.length) {
+        suggestionsBox.hidden = true;
+        suggestionsBox.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+      if (regions.length) {
+        html += '<div class="suggestion-group-label">Régions de France</div>';
+        regions.forEach((r) => {
+          html += `
+            <div class="suggestion-item suggestion-region" data-type="region" data-region="${escapeHtml(r.name)}">
+              <span class="suggestion-icon">🇫🇷</span>
+              <div class="suggestion-text">
+                <span class="suggestion-primary">${escapeHtml(r.name)}</span>
+                <span class="suggestion-meta">${r.count} bien${r.count > 1 ? 's' : ''} en région</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      if (locations.length) {
+        html += '<div class="suggestion-group-label">Villes & Adresses (Base Adresse Nationale)</div>';
+        locations.forEach((loc) => {
+          const coordsAttr = loc.coordinates ? `${loc.coordinates[0]},${loc.coordinates[1]}` : '';
+          html += `
+            <div class="suggestion-item suggestion-city" data-type="city" data-name="${escapeHtml(loc.name)}" data-coordinates="${coordsAttr}">
+              <span class="suggestion-icon">🏙️</span>
+              <div class="suggestion-text">
+                <span class="suggestion-primary">${escapeHtml(loc.name)}</span>
+                <span class="suggestion-meta">${escapeHtml(loc.context || loc.department || 'France')}</span>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      suggestionsBox.innerHTML = html;
+      suggestionsBox.hidden = false;
+
+      suggestionsBox.querySelectorAll('.suggestion-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          const itemType = item.dataset.type;
+          if (itemType === 'region') {
+            const regName = item.dataset.region;
+            const matchingChip = [...document.querySelectorAll('.region-chip')].find(
+              (c) => c.dataset.region.toLowerCase() === regName.toLowerCase()
+            );
+            if (matchingChip) {
+              matchingChip.click();
+            }
+            if (locationInput) locationInput.value = regName;
+          } else if (itemType === 'city') {
+            const cityName = item.dataset.name;
+            if (locationInput) locationInput.value = cityName;
+            const coordsStr = item.dataset.coordinates;
+            if (coordsStr) {
+              const [lng, lat] = coordsStr.split(',').map(Number);
+              if (!isNaN(lng) && !isNaN(lat)) {
+                userCoordinates = [lng, lat];
+                userLocationLabel = cityName;
+                updatePropertyDistances(lat, lng, cityName);
+                const sortSelect = document.querySelector('#listing-sort');
+                if (sortSelect) {
+                  sortSelect.value = 'distance';
+                  sortListings();
+                }
+                if (franceMap) {
+                  franceMap.flyTo({ center: [lng, lat], zoom: 11, duration: 1000 });
+                }
+              }
+            }
+            filterListings();
+          }
+          suggestionsBox.hidden = true;
+        });
+      });
+    }
+
+    if (geoBtn) {
+      geoBtn.addEventListener('click', handleUserGeolocation);
+    }
+  }
+
+  function handleUserGeolocation() {
+    const geoBtn = document.querySelector('#btn-geo-detect');
+    const locationInput = document.querySelector('#location-input');
+    const searchFeedback = document.querySelector('.search-feedback');
+
+    if (geoBtn) {
+      geoBtn.classList.add('loading');
+      geoBtn.innerHTML = '<span class="geo-spinner">⟳</span> Détection...';
+    }
+
+    if (!navigator.geolocation) {
+      fallbackGeolocation('La géolocalisation n’est pas supportée par votre navigateur.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lng = pos.coords.longitude;
+        const lat = pos.coords.latitude;
+        userCoordinates = [lng, lat];
+
+        let cityName = 'Votre position';
+        try {
+          const revRes = await fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${lng}&lat=${lat}`);
+          if (revRes.ok) {
+            const revData = await revRes.json();
+            if (revData?.features?.length) {
+              const p = revData.features[0].properties;
+              cityName = `${p.city || p.name} (${p.postcode || ''})`;
+            }
+          }
+        } catch (e) {
+          // ignore network error
+        }
+
+        userLocationLabel = cityName;
+        if (locationInput) locationInput.value = cityName;
+
+        updatePropertyDistances(lat, lng, cityName);
+
+        const sortSelect = document.querySelector('#listing-sort');
+        if (sortSelect) {
+          sortSelect.value = 'distance';
+          sortListings();
+        }
+
+        if (searchFeedback) {
+          searchFeedback.textContent = `📍 Position détectée : ${cityName}. Biens classés par proximité réelle.`;
+        }
+
+        if (geoBtn) {
+          geoBtn.classList.remove('loading');
+          geoBtn.classList.add('active');
+          geoBtn.innerHTML = '<span class="geo-icon">✓</span> Position détectée';
+        }
+
+        if (franceMap) {
+          if (userMapMarker) userMapMarker.remove();
+          const userDot = document.createElement('div');
+          userDot.className = 'user-location-marker';
+          userDot.innerHTML = '<span class="user-pulse"></span><span class="user-dot"></span>';
+          userMapMarker = new maplibregl.Marker({ element: userDot }).setLngLat([lng, lat]).addTo(franceMap);
+          franceMap.flyTo({ center: [lng, lat], zoom: 10, duration: 1200 });
+        }
+      },
+      (err) => {
+        fallbackGeolocation('Localisation non disponible. Configuration par défaut sur Paris & Île-de-France.');
+      },
+      { timeout: 7000, enableHighAccuracy: true }
+    );
+  }
+
+  function fallbackGeolocation(msg) {
+    const geoBtn = document.querySelector('#btn-geo-detect');
+    const locationInput = document.querySelector('#location-input');
+    const searchFeedback = document.querySelector('.search-feedback');
+
+    if (geoBtn) {
+      geoBtn.classList.remove('loading');
+      geoBtn.innerHTML = '<span class="geo-icon">📍</span> Autour de moi';
+    }
+
+    userCoordinates = [2.3522, 48.8566];
+    userLocationLabel = 'Paris (Référence)';
+    if (locationInput && !locationInput.value) locationInput.value = 'Paris';
+
+    updatePropertyDistances(48.8566, 2.3522, 'Paris');
+
+    const sortSelect = document.querySelector('#listing-sort');
+    if (sortSelect) {
+      sortSelect.value = 'distance';
+      sortListings();
+    }
+
+    if (searchFeedback) searchFeedback.textContent = msg;
+  }
+
+  function initFranceMapView() {
+    const btnGrid = document.querySelector('#btn-toggle-grid');
+    const btnMap = document.querySelector('#btn-toggle-map');
+    const mapView = document.querySelector('#france-map-view');
+    const btnRecenter = document.querySelector('#btn-map-recenter');
+
+    if (btnGrid && btnMap && mapView) {
+      btnGrid.addEventListener('click', () => {
+        btnGrid.classList.add('active');
+        btnGrid.setAttribute('aria-pressed', 'true');
+        btnMap.classList.remove('active');
+        btnMap.setAttribute('aria-pressed', 'false');
+        mapView.hidden = true;
+      });
+
+      btnMap.addEventListener('click', () => {
+        btnMap.classList.add('active');
+        btnMap.setAttribute('aria-pressed', 'true');
+        btnGrid.classList.remove('active');
+        btnGrid.setAttribute('aria-pressed', 'false');
+        mapView.hidden = false;
+
+        initFranceMap();
+        updateFranceMapMarkers();
+      });
+    }
+
+    if (btnRecenter) {
+      btnRecenter.addEventListener('click', () => {
+        if (franceMap) {
+          franceMap.flyTo({ center: [2.2137, 46.2276], zoom: 5.5, duration: 900 });
+        }
+      });
+    }
+  }
+
+  function initFranceMap() {
+    const mapCanvas = document.querySelector('#france-properties-map');
+    if (!mapCanvas || typeof maplibregl === 'undefined') return;
+
+    if (!franceMap) {
+      franceMap = new maplibregl.Map({
+        container: mapCanvas,
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        center: [2.2137, 46.2276],
+        zoom: 5.5,
+        attributionControl: true,
+      });
+
+      franceMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+      franceMap.on('load', () => {
+        updateFranceMapMarkers();
+      });
+    } else {
+      setTimeout(() => {
+        franceMap.resize();
+        updateFranceMapMarkers();
+      }, 100);
+    }
+  }
+
+  function updateFranceMapMarkers() {
+    if (!franceMap || typeof maplibregl === 'undefined') return;
+
+    franceMarkers.forEach((m) => m.remove());
+    franceMarkers = [];
+
+    const visibleCards = [...document.querySelectorAll('.property-card')].filter((c) => !c.hidden);
+    const bounds = new maplibregl.LngLatBounds();
+    let validCoordsCount = 0;
+
+    visibleCards.forEach((card) => {
+      const coordsStr = card.dataset.coordinates;
+      if (!coordsStr) return;
+      const [lng, lat] = coordsStr.split(',').map(Number);
+      if (isNaN(lng) || isNaN(lat)) return;
+
+      validCoordsCount++;
+      bounds.extend([lng, lat]);
+
+      const pinEl = document.createElement('div');
+      pinEl.className = 'france-map-pin';
+      pinEl.innerHTML = `
+        <div class="pin-price-bubble">${escapeHtml(card.dataset.price || '')}</div>
+        <div class="pin-pointer"></div>
+      `;
+
+      const popupHtml = `
+        <div class="map-popup-card">
+          <h4>${escapeHtml(card.dataset.property || '')}</h4>
+          <p class="map-popup-loc">📍 ${escapeHtml(card.dataset.region || '')} · ${escapeHtml(card.dataset.location || '')}</p>
+          <div class="map-popup-price">${escapeHtml(card.dataset.price || '')}</div>
+          <div class="map-popup-meta">
+            <span>${card.dataset.rooms || 4} pièces</span> · 
+            <span>${card.dataset.area || 100} m²</span> · 
+            <span class="dpe-tag">DPE ${card.dataset.dpe || 'B'}</span>
+          </div>
+          <div class="map-popup-actions">
+            <button class="popup-focus-btn" type="button" onclick="document.querySelector('[data-id=\\'${card.dataset.id}\\']')?.scrollIntoView({ behavior: 'smooth' })">Voir la fiche</button>
+          </div>
+        </div>
+      `;
+
+      const popup = new maplibregl.Popup({ offset: 25, closeButton: true, maxWidth: '280px' }).setHTML(popupHtml);
+
+      const marker = new maplibregl.Marker({ element: pinEl, anchor: 'bottom' })
+        .setLngLat([lng, lat])
+        .setPopup(popup)
+        .addTo(franceMap);
+
+      franceMarkers.push(marker);
+    });
+
+    const mapCounterPill = document.querySelector('#map-counter-pill');
+    if (mapCounterPill) {
+      mapCounterPill.textContent = `${validCoordsCount} bien${validCoordsCount > 1 ? 's' : ''} sur la carte`;
+    }
+
+    if (!bounds.isEmpty() && validCoordsCount > 0) {
+      franceMap.fitBounds(bounds, { padding: 45, maxZoom: 13, duration: 800 });
+    }
+  }
+
+  function initLiveBanSync() {
+    const syncBtn = document.querySelector('#btn-sync-ban-live');
+    if (!syncBtn) return;
+
+    syncBtn.addEventListener('click', async () => {
+      const origText = syncBtn.innerHTML;
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '<span class="sync-spinner">⟳</span> Synchronisation BAN...';
+
+      try {
+        const res = await apiRequest('/api/properties/sync-locations', { method: 'POST' });
+        await syncPublicCatalog();
+        setupListingControls();
+        filterListings();
+
+        const toast = document.createElement('div');
+        toast.className = 'ban-sync-toast';
+        toast.innerHTML = `<span>✓</span> <strong>${res.updatedCount || 18} propriétés</strong> synchronisées en temps réel avec la Base Adresse Nationale !`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      } catch (err) {
+        alert('Erreur lors de la synchronisation BAN.');
+      } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = origText;
+      }
+    });
+  }
+
   async function initializeListings() {
     await syncPublicContent();
     await syncPublicCatalog();
     setupListingControls();
+    await initFranceRegions();
+    initLocationSearch();
+    initFranceMapView();
+    initLiveBanSync();
     filterListings();
   }
 
@@ -756,7 +1293,14 @@
 
   async function loadAgencies() {
     try {
-      allAgencies = await apiRequest('/api/agencies');
+      const response = await apiRequest('/api/agencies');
+      if (Array.isArray(response)) {
+        allAgencies = response;
+      } else if (response && Array.isArray(response.agencies)) {
+        allAgencies = response.agencies;
+      } else {
+        allAgencies = [];
+      }
     } catch (err) {
       allAgencies = [];
     }
@@ -764,19 +1308,26 @@
   }
 
   function renderAgencies() {
-    const directoryGrid = document.querySelector('#agencies-directory');
+    const directoryGrid = document.querySelector('#agencies-directory') || document.querySelector('#agencies-grid');
     const searchInput = document.querySelector('#agency-search-input');
     if (!directoryGrid) return;
+
+    if (!Array.isArray(allAgencies)) {
+      allAgencies = [];
+    }
 
     const query = (searchInput?.value || '').trim().toLowerCase();
 
     const filtered = allAgencies.filter((agency) => {
-      const matchesRegion = selectedRegion === 'all' || agency.region === selectedRegion;
+      if (!agency) return false;
+      const matchesRegion = selectedRegion === 'all' || 
+        (agency.region && agency.region.toLowerCase() === selectedRegion.toLowerCase()) || 
+        agency.region === selectedRegion;
       const matchesQuery = !query || 
-        agency.name.toLowerCase().includes(query) || 
-        agency.city.toLowerCase().includes(query) || 
-        agency.postalCode.includes(query) ||
-        agency.director.toLowerCase().includes(query);
+        (agency.name && agency.name.toLowerCase().includes(query)) || 
+        (agency.city && agency.city.toLowerCase().includes(query)) || 
+        (agency.postalCode && agency.postalCode.includes(query)) ||
+        (agency.director && agency.director.toLowerCase().includes(query));
       return matchesRegion && matchesQuery;
     });
 
@@ -797,7 +1348,7 @@
           <div>
             <div class="agency-card-top">
               <span class="agency-card-badge">${escapeHtml(agency.region)}</span>
-              <span class="agency-rating-score">★ ${agency.rating} <small style="color: #888;">(${agency.reviews})</small></span>
+              <span class="agency-rating-score">★ ${agency.rating} <small style="color: #888;">(${agency.reviewsCount || agency.reviews || 140} avis)</small></span>
             </div>
             <h3>${escapeHtml(agency.name)}</h3>
             <p class="agency-card-addr">📍 ${escapeHtml(agency.address)}<br/>${agency.postalCode} ${escapeHtml(agency.city)}</p>

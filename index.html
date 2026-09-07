@@ -125,8 +125,14 @@
                 <option value="Manoir">Manoir</option>
               </select>
             </label>
-            <label>Où ? (Ville, Région, Département)
-              <input type="text" placeholder="Paris, Nice, Lyon, Bordeaux, Megève..." />
+            <label class="location-search-field">Où ? (Ville, Région, Département)
+              <div class="location-search-box">
+                <input type="text" id="location-input" autocomplete="off" placeholder="Paris, Nice, Lyon, Bordeaux, Megève..." />
+                <button class="btn-geo-detect" id="btn-geo-detect" type="button" title="Localiser les biens autour de moi">
+                  <span class="geo-icon">📍</span> <span class="geo-label">Autour de moi</span>
+                </button>
+                <div class="location-suggestions-box" id="location-suggestions-box" hidden></div>
+              </div>
             </label>
             <button class="search-button" type="submit"><span>Rechercher</span><strong>↗</strong></button>
           </form>
@@ -178,6 +184,31 @@
             </div>
           </div>
 
+          <!-- Barre de Régions de France (Temps réel Base Adresse Nationale) -->
+          <div class="france-regions-container" id="france-regions-bar">
+            <div class="france-regions-heading">
+              <div class="regions-title-wrap">
+                <span class="regions-flag">🇫🇷</span>
+                <strong>Explorer par Région de France</strong>
+                <span class="regions-live-tag" id="regions-live-tag">BAN Temps Réel</span>
+              </div>
+              <button class="btn-sync-ban-live" id="btn-sync-ban-live" type="button" title="Synchroniser la géolocalisation BAN">
+                <span class="sync-pulse"></span> Actualiser la géolocalisation
+              </button>
+            </div>
+            <div class="france-regions-scroll" id="france-regions-scroll">
+              <button class="region-chip active" data-region="all" type="button">Toute la France <span class="chip-count">18</span></button>
+              <button class="region-chip" data-region="Île-de-France" type="button">Île-de-France <span class="chip-count">3</span></button>
+              <button class="region-chip" data-region="Provence-Alpes-Côte d'Azur" type="button">PACA &amp; Riviera <span class="chip-count">4</span></button>
+              <button class="region-chip" data-region="Nouvelle-Aquitaine" type="button">Nouvelle-Aquitaine <span class="chip-count">4</span></button>
+              <button class="region-chip" data-region="Auvergne-Rhône-Alpes" type="button">Auvergne-Rhône-Alpes <span class="chip-count">3</span></button>
+              <button class="region-chip" data-region="Normandie" type="button">Normandie <span class="chip-count">1</span></button>
+              <button class="region-chip" data-region="Pays de la Loire" type="button">Pays de la Loire <span class="chip-count">1</span></button>
+              <button class="region-chip" data-region="Bretagne" type="button">Bretagne <span class="chip-count">1</span></button>
+              <button class="region-chip" data-region="Occitanie" type="button">Occitanie <span class="chip-count">1</span></button>
+            </div>
+          </div>
+
           <p class="search-feedback" aria-live="polite"></p>
         </div>
       </section>
@@ -188,20 +219,45 @@
           <div>
             <p class="eyebrow dark">Portefeuille d'exception</p>
             <h2>Votre prochain <em>chez-vous.</em></h2>
-            <p class="section-intro">Chaque bien sélectionné par LaForêt bénéficie d'une vérification juridique rigoureuse, d'un audit de diagnostic énergétique (DPE) et pour nos exclusivités, des garanties du Mandat Favoriz.</p>
+            <p class="section-intro">Chaque bien sélectionné par LaForêt bénéficie d'une vérification juridique rigoureuse, d'une géolocalisation certifiée en temps réel (Base Adresse Nationale), et pour nos exclusivités, des garanties du Mandat Favoriz.</p>
           </div>
           <a class="text-link" href="#estimer">Faire estimer votre bien <span>↗</span></a>
         </div>
         <div class="listing-toolbar">
-          <div><strong class="listing-count">12 biens</strong><span> · disponibles immédiatement</span></div>
+          <div class="listing-toolbar-info">
+            <strong class="listing-count">18 biens</strong>
+            <span class="listing-region-badge" id="listing-region-badge"> · Toute la France</span>
+            <span class="listing-user-dist" id="listing-user-dist" hidden></span>
+          </div>
+          <div class="listing-view-toggles">
+            <button class="btn-view-toggle active" id="btn-toggle-grid" type="button" aria-pressed="true">⊞ Grille</button>
+            <button class="btn-view-toggle" id="btn-toggle-map" type="button" aria-pressed="false">🗺️ Carte de France</button>
+          </div>
           <label for="listing-sort">Trier par
             <select id="listing-sort">
               <option value="featured">Notre sélection Favoriz</option>
+              <option value="distance">Proximité (Autour de moi)</option>
               <option value="price-low">Prix croissant</option>
               <option value="price-high">Prix décroissant</option>
+              <option value="area">Surface décroissante</option>
               <option value="name">Nom du bien</option>
             </select>
           </label>
+        </div>
+
+        <!-- Vue Interactive Carte de France -->
+        <div class="france-map-view" id="france-map-view" hidden>
+          <div class="france-map-banner">
+            <div>
+              <strong>Carte des Propriétés LaForêt en France</strong>
+              <p class="map-sub">Géolocalisation certifiée en temps réel via la Base Adresse Nationale (BAN). Cliquez sur un marqueur pour inspecter la fiche du bien.</p>
+            </div>
+            <div class="france-map-banner-actions">
+              <span class="map-counter-pill" id="map-counter-pill">18 biens sur la carte</span>
+              <button class="btn-map-recenter" id="btn-map-recenter" type="button">Centrer toute la France</button>
+            </div>
+          </div>
+          <div class="france-map-canvas" id="france-properties-map"></div>
         </div>
         <div class="property-grid">
           <!-- Property cards are dynamically populated & synchronized by script.js with DPE, Favoriz badges & loan simulator triggers -->
@@ -518,7 +574,7 @@
             <button type="button" class="btn-region-chip" data-region="Pays de la Loire">Pays de la Loire</button>
           </div>
 
-          <div class="agencies-directory-grid" id="agencies-grid">
+          <div class="agencies-directory-grid" id="agencies-directory">
             <!-- Dynamically populated from /api/agencies -->
           </div>
         </div>

@@ -1,6 +1,6 @@
 {
   "name": "LaForêt Immobilier",
   "description": "Portail immobilier LaForêt : estimation en ligne immédiate, simulateur de prêt, réseau de 720 agences, Mandat Favoriz, DPE et visites virtuelles 3D.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
