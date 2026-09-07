@@ -38,6 +38,8 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -48,6 +50,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 body.modal-open {
@@ -125,12 +130,15 @@ h1, h2, h3, h4, p {
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   height: 76px;
-  padding: 0 4vw;
+  padding: 0 clamp(16px, 4vw, 48px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
   background: var(--deep-translucent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -378,6 +386,10 @@ h1, h2, h3, h4, p {
   display: flex;
   align-items: center;
   padding-top: 76px;
+  padding-left: clamp(20px, 5vw, 64px);
+  padding-right: clamp(20px, 5vw, 64px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .hero-image {
@@ -399,8 +411,9 @@ h1, h2, h3, h4, p {
   position: relative;
   z-index: 2;
   max-width: 740px;
-  margin-left: 6vw;
-  padding-right: 24px;
+  width: 100%;
+  margin-left: 0;
+  padding-right: 0;
   animation: rise 0.9s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -3163,6 +3176,10 @@ footer div a:hover {
 
 /* Medium Tablets & Mobile Navigation Trigger (max-width: 991px) */
 @media (max-width: 991px) {
+  .site-header {
+    padding: 0 16px;
+    gap: 12px;
+  }
   .desktop-nav, .header-action {
     display: none;
   }
@@ -3190,21 +3207,95 @@ footer div a:hover {
 /* Small Screens & Mobile Phones (max-width: 767px) */
 @media (max-width: 767px) {
   .site-header {
-    height: 68px;
-    padding: 0 20px;
+    height: 64px;
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .official-logo {
+    width: 104px;
+  }
+  .language-switcher {
+    gap: 4px;
+    margin-left: auto;
+  }
+  .language-switcher > span {
+    display: none;
+  }
+  .language-switcher .goog-te-gadget-simple {
+    padding: 4px 6px;
+    max-width: 110px;
+  }
+  .language-switcher .goog-te-menu-value {
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+  .cart-button {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+  .cart-button b {
+    min-width: 17px;
+    height: 17px;
+    font-size: 9px;
+  }
+  .menu-toggle {
+    padding: 6px;
+  }
+  .menu-toggle span {
+    width: 22px;
+  }
+  .mobile-menu {
+    top: 64px;
   }
   .hero {
-    min-height: 580px;
+    min-height: 520px;
     height: auto;
-    padding-top: 100px;
-    padding-bottom: 60px;
+    padding-top: 86px;
+    padding-bottom: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
   }
   .hero-content {
     margin-left: 0;
     padding-right: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .hero .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
   }
   .hero h1 {
-    font-size: 38px;
+    font-size: clamp(28px, 7.6vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+  .hero-intro {
+    font-size: clamp(13.5px, 3.8vw, 15px);
+    line-height: 1.6;
+    margin-bottom: 22px;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .hero-cta-primary,
+  .hero-cta-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 13px 20px;
+    font-size: 12px;
+    box-sizing: border-box;
   }
   .hero-bottom {
     display: none;
@@ -3214,10 +3305,10 @@ footer div a:hover {
     gap: 16px;
   }
   .search-wrap {
-    padding: 50px 20px 60px;
+    padding: 50px 18px 60px;
   }
   .search-box {
-    padding: 0 20px 24px;
+    padding: 0 18px 24px;
   }
   .search-tabs {
     gap: 18px;
@@ -3305,6 +3396,86 @@ footer div a:hover {
   footer div {
     flex-wrap: wrap;
     gap: 14px;
+  }
+}
+
+/* Extra Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .site-header {
+    height: 60px;
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .official-logo {
+    width: 92px;
+  }
+  .language-switcher {
+    gap: 2px;
+  }
+  .language-switcher .goog-te-gadget-simple {
+    max-width: 90px;
+    padding: 3px 5px;
+  }
+  .language-switcher .goog-te-menu-value {
+    font-size: 9px;
+  }
+  .cart-button {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+  .cart-button b {
+    min-width: 15px;
+    height: 15px;
+    font-size: 8px;
+    top: -3px;
+    right: -3px;
+  }
+  .menu-toggle {
+    padding: 5px;
+  }
+  .menu-toggle span {
+    width: 20px;
+  }
+  .mobile-menu {
+    top: 60px;
+  }
+  .hero {
+    min-height: 480px;
+    padding-top: 76px;
+    padding-bottom: 40px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .hero h1 {
+    font-size: clamp(25px, 7vw, 32px);
+    margin-bottom: 14px;
+  }
+  .hero-intro {
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .hero-cta-primary,
+  .hero-cta-secondary {
+    padding: 12px 14px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .search-wrap {
+    padding: 40px 14px 50px;
+  }
+  .search-box {
+    padding: 0 14px 18px;
+  }
+  .properties {
+    padding: 50px 14px 60px;
+  }
+  .property-actions {
+    grid-template-columns: 1fr;
+  }
+  .estimation-section, .simulator-section, .services-section, .agencies-section, .contact {
+    padding: 50px 14px 60px;
   }
 }
 
