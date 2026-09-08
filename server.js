@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Pool } = require('pg');
 const { getPropertyTour } = require('./property-tours-data');
+const propertyDetailsData = require('./property-details-data');
 
 const root = __dirname;
 const port = Number(process.env.PORT || 3000);
@@ -356,7 +357,13 @@ async function initializeDatabase() {
 }
 
 function sendJson(response, status, body) {
-  response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+  response.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  });
   response.end(JSON.stringify(body));
 }
 
@@ -375,8 +382,10 @@ function parseBody(request) {
 }
 
 function propertyResponse(row) {
+  const detail = (propertyDetailsData && propertyDetailsData[String(row.id)]) || {};
   return {
     ...row,
+    ref: detail.ref || `LF-${row.postal_code || row.postalCode || '75000'}-${String(row.id).padStart(2, '0')}`,
     tour: Boolean(row.tour),
     region: row.region || 'Île-de-France',
     department: row.department || 'France',
@@ -386,6 +395,23 @@ function propertyResponse(row) {
     address: row.address || row.location,
     rent_price: row.rent_price || row.rentPrice || '8 000 € / mois',
     favoriz: row.favoriz !== false,
+    images: detail.images || (row.image_class ? [`https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=85`] : []),
+    description_preview: detail.description_preview || `Prestigieuse propriété située à ${row.location}, développant ${row.area} m² et ${row.rooms} pièces d'exception.`,
+    description_full: detail.description_full || detail.description_preview || `Prestigieuse propriété située à ${row.location}.`,
+    features: detail.features || ['Prestations de prestige', 'Emplacement recherché', 'Mandat Favoriz'],
+    agent: detail.agent || null,
+    energy: detail.energy || {
+      has_data: Boolean(row.dpe),
+      dpe_rating: row.dpe || 'B',
+      dpe_value: row.dpe_value || 75,
+      ges_rating: row.ges || 'B',
+      ges_value: row.ges_value || 15,
+      annual_cost_min: 1200,
+      annual_cost_max: 1650,
+      certificate_ref: `DPE-${row.postal_code || '75000'}-${row.id}`
+    },
+    has_brochure: detail.has_brochure !== false,
+    brochure_filename: detail.brochure_filename || `Dossier-Prestige-${row.id}.pdf`,
   };
 }
 
@@ -459,10 +485,22 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/inquiries') {
     const body = await parseBody(request);
     const email = String(body.email || '').trim();
-    const paymentMethod = String(body.paymentMethod || '').trim();
-    const propertyIds = Array.isArray(body.propertyIds) ? body.propertyIds : [];
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !paymentMethod) return sendJson(response, 400, { error: 'A valid email and payment method are required.' });
-    inMemoryInquiries.push({ id: Date.now(), email, paymentMethod, propertyIds, createdAt: new Date().toISOString() });
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return sendJson(response, 400, { error: 'A valid email is required.' });
+
+    const paymentMethod = String(body.paymentMethod || body.inquiryType || 'contact').trim();
+    const propertyIds = Array.isArray(body.propertyIds) ? body.propertyIds : (body.propertyId ? [Number(body.propertyId)] : []);
+    const inquiryRecord = {
+      id: Date.now(),
+      email,
+      name: String(body.name || '').trim(),
+      phone: String(body.phone || '').trim(),
+      message: String(body.message || '').trim(),
+      propertyName: String(body.propertyName || '').trim(),
+      paymentMethod,
+      propertyIds,
+      createdAt: new Date().toISOString()
+    };
+    inMemoryInquiries.push(inquiryRecord);
     if (pool) {
       try {
         await pool.query('INSERT INTO inquiries (email, payment_method, property_ids) VALUES ($1, $2, $3)', [email, paymentMethod, JSON.stringify(propertyIds)]);
@@ -470,10 +508,23 @@ async function handleApi(request, response, url) {
         console.warn('Postgres inquiry error, saved in-memory:', err.message);
       }
     }
-    return sendJson(response, 201, { received: true });
+    return sendJson(response, 201, { received: true, inquiry: inquiryRecord });
   }
 
   const propertyMatch = url.pathname.match(/^\/api\/properties\/(\d+)$/);
+  if (request.method === 'GET' && propertyMatch) {
+    const targetId = Number(propertyMatch[1]);
+    let prop = inMemoryProperties.find((p) => p.id === targetId);
+    if (!prop && pool) {
+      try {
+        const result = await pool.query('SELECT * FROM properties WHERE id = $1', [targetId]);
+        if (result.rows.length > 0) prop = result.rows[0];
+      } catch (err) {
+        console.warn('Postgres property fetch error:', err.message);
+      }
+    }
+    return prop ? sendJson(response, 200, propertyResponse(prop)) : sendJson(response, 404, { error: 'Property not found' });
+  }
   if ((request.method === 'POST' && url.pathname === '/api/properties') || (request.method === 'PATCH' && propertyMatch)) {
     const body = await parseBody(request);
     const values = [
@@ -868,6 +919,15 @@ async function handleApi(request, response, url) {
     });
   }
 
+  if (url.pathname === '/api/health' || url.pathname === '/health') {
+    return sendJson(response, 200, {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      database: pool ? 'connected' : 'in-memory',
+    });
+  }
+
   return sendJson(response, 404, { error: 'API route not found.' });
 }
 
@@ -895,16 +955,50 @@ function serveStatic(request, response, url) {
     '.webp': 'image/webp',
     '.gif': 'image/gif',
     '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.otf': 'font/otf',
+    '.map': 'application/json',
   };
   response.writeHead(200, { 'Content-Type': contentTypes[path.extname(filePath)] || 'application/octet-stream' });
-  fs.createReadStream(filePath).pipe(response);
+  const stream = fs.createReadStream(filePath);
+  stream.on('error', (err) => {
+    if (!response.headersSent) {
+      sendJson(response, 500, { error: 'Error reading file.' });
+    } else {
+      response.end();
+    }
+  });
+  request.on('close', () => {
+    stream.destroy();
+  });
+  stream.pipe(response);
 }
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.method === 'OPTIONS') {
+      response.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      });
+      return response.end();
+    }
+
     const rawPath = String(request.url || '').split('?')[0];
     if (/%2e|%5c/i.test(rawPath)) return sendJson(response, 404, { error: 'Not found.' });
     const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+    
+    if (url.pathname === '/health') {
+      return sendJson(response, 200, {
+        status: 'ok',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     if (url.pathname.startsWith('/api/')) await handleApi(request, response, url);
     else if (request.method === 'GET') serveStatic(request, response, url);
     else sendJson(response, 405, { error: 'Method not allowed.' });

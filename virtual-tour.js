@@ -1,11 +1,19 @@
 /**
  * 3D Property Tour Integration
  * Binds property cards and featured banners to the immersive 3D viewer.
+ * Loads 3D WebGL modules lazily on demand to avoid blocking initial page load.
  */
-import { PropertyTour, DEFAULT_DEMO_TOUR } from './components/property-tour/index.js';
 
-// Cache for fetched tour configs
+// Cache for fetched tour configs and dynamic tour module
 const tourCache = new Map();
+let propertyTourModulePromise = null;
+
+async function getTourModule() {
+  if (!propertyTourModulePromise) {
+    propertyTourModulePromise = import('./components/property-tour/index.js');
+  }
+  return propertyTourModulePromise;
+}
 
 /**
  * Loads tour data from backend or cache.
@@ -13,7 +21,6 @@ const tourCache = new Map();
  * @returns {Promise<any>}
  */
 async function fetchTourData(propertyId) {
-  if (!propertyId) return DEFAULT_DEMO_TOUR;
   if (tourCache.has(propertyId)) return tourCache.get(propertyId);
 
   try {
@@ -27,7 +34,8 @@ async function fetchTourData(propertyId) {
     console.warn(`[3D Tour] Could not fetch /api/tours/${propertyId}, using demo tour:`, err);
   }
 
-  return DEFAULT_DEMO_TOUR;
+  const mod = await getTourModule();
+  return mod.DEFAULT_DEMO_TOUR;
 }
 
 /**
@@ -58,12 +66,12 @@ export async function openVirtualTour(property, explicitTourData = null) {
   document.querySelector('.tour-modal')?.classList.remove('open');
   document.querySelector('.tour-modal')?.setAttribute('aria-hidden', 'true');
 
-  let tourData = explicitTourData;
-  if (!tourData) {
-    tourData = await fetchTourData(propId);
-  }
+  const [tourModule, tourData] = await Promise.all([
+    getTourModule(),
+    explicitTourData ? Promise.resolve(explicitTourData) : fetchTourData(propId),
+  ]);
 
-  return PropertyTour.open({
+  return tourModule.PropertyTour.open({
     property: { id: propId, name: propName },
     tour: tourData,
   });
@@ -72,12 +80,12 @@ export async function openVirtualTour(property, explicitTourData = null) {
 // Global window exposure
 if (typeof window !== 'undefined') {
   window.openVirtualTour = openVirtualTour;
-  window.PropertyTour = PropertyTour;
+  window.getPropertyTourModule = getTourModule;
 }
 
-// Click listener on property listing tour buttons
+// Click listener on property listing tour buttons and immersive features
 document.addEventListener('click', async (event) => {
-  const trigger = event.target.closest('.tour-trigger, .featured-tour-trigger, [data-action="open-3d-tour"]');
+  const trigger = event.target.closest('.tour-trigger, .featured-tour-trigger, .tour-modal-trigger, .btn-secondary-tour, .virtual-feature-art, [data-action="open-3d-tour"]');
   if (!trigger) return;
 
   event.preventDefault();
@@ -87,6 +95,5 @@ document.addEventListener('click', async (event) => {
   const propertyName = trigger.dataset.property || card?.dataset.property || 'Hôtel Particulier Champ-de-Mars';
   const propertyId = trigger.dataset.propertyId || card?.dataset.id || '1';
 
-  const tourData = await fetchTourData(propertyId);
-  openVirtualTour({ id: propertyId, name: propertyName }, tourData);
+  openVirtualTour({ id: propertyId, name: propertyName });
 });

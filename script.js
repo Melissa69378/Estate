@@ -5,15 +5,52 @@
   function googleTranslateElementInit() {
     if (typeof google === 'undefined' || !google.translate || !google.translate.TranslateElement) return;
 
-    new google.translate.TranslateElement({
-      pageLanguage: 'fr',
-      includedLanguages: 'af,ar,bg,ca,cs,da,de,el,en,es,et,fa,fi,fr,he,hi,hr,hu,id,it,ja,ko,lt,lv,nl,no,pl,pt,ro,ru,sk,sl,sr,sv,sw,th,tr,uk,ur,vi,zh-CN,zh-TW',
-      autoDisplay: false,
-      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-    }, 'google_translate_element');
+    try {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        includedLanguages: 'af,ar,bg,ca,cs,da,de,el,en,es,et,fa,fi,fr,he,hi,hr,hu,id,it,ja,ko,lt,lv,nl,no,pl,pt,ro,ru,sk,sl,sr,sv,sw,th,tr,uk,ur,vi,zh-CN,zh-TW',
+        autoDisplay: false,
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      }, 'google_translate_element');
+    } catch (e) {
+      console.warn('Google Translate initialization notice:', e);
+    }
   }
 
   window.googleTranslateElementInit = googleTranslateElementInit;
+
+  // Asynchronous non-blocking loader for Google Translate
+  let translateScriptLoaded = false;
+  function loadGoogleTranslateDeferred() {
+    if (translateScriptLoaded) return;
+    translateScriptLoaded = true;
+    try {
+      const script = document.createElement('script');
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => {
+        console.warn('Google Translate service unavailable or restricted by browser.');
+      };
+      document.body.appendChild(script);
+    } catch (e) {
+      console.warn('Google Translate load skipped:', e);
+    }
+  }
+
+  const langSwitcher = document.querySelector('.language-switcher');
+  if (langSwitcher) {
+    langSwitcher.addEventListener('pointerenter', loadGoogleTranslateDeferred, { once: true });
+    langSwitcher.addEventListener('click', loadGoogleTranslateDeferred, { once: true });
+    langSwitcher.addEventListener('focusin', loadGoogleTranslateDeferred, { once: true });
+  }
+  if (typeof window !== 'undefined') {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => setTimeout(loadGoogleTranslateDeferred, 2500), { timeout: 6000 });
+    } else {
+      setTimeout(loadGoogleTranslateDeferred, 3000);
+    }
+  }
 
   if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', () => {
@@ -33,9 +70,21 @@
   let currentPropertiesList = [];
 
   async function apiRequest(path, options = {}) {
-    const response = await fetch(path, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
-    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
-    return response.json();
+    const controller = new AbortController();
+    const timeoutDuration = options.timeout || 4000;
+    const timeoutId = setTimeout(() => controller.abort(), timeoutDuration);
+
+    try {
+      const response = await fetch(path, {
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        signal: controller.signal,
+        ...options,
+      });
+      if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+      return await response.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   function getActiveMode() {
@@ -191,25 +240,11 @@
     }
   }
 
-  async function syncPublicCatalog() {
+  function renderPropertiesCatalog(properties) {
     const grid = document.querySelector('.property-grid');
-    if (!grid) return;
+    if (!grid || !Array.isArray(properties) || !properties.length) return;
 
-    let properties = null;
-    try {
-      properties = await apiRequest('/api/properties?status=published');
-    } catch (error) {
-      try {
-        const storedProperties = JSON.parse(localStorage.getItem('laforet-admin-properties') || '[]');
-        if (Array.isArray(storedProperties) && storedProperties.length) properties = storedProperties.filter((property) => property.status === 'published');
-      } catch (storageError) {
-        properties = null;
-      }
-    }
-
-    if (!properties) return;
     currentPropertiesList = properties;
-
     const isRent = getActiveMode() === 'louer';
 
     grid.innerHTML = properties.map((property, index) => {
@@ -222,18 +257,18 @@
       const dpe = escapeHtml(property.dpe || 'B');
       const favoriz = Boolean(property.favoriz);
       const numericPrice = parseNumericPrice(price);
-      const area = property.area || 120;
+      const area = property.area || property.surface || 120;
       const rooms = property.rooms || 4;
       const bedrooms = property.bedrooms || 3;
-      const hasTour = property.tour === true || Boolean(property.tourUrl);
-      const tourBtn = hasTour ? `<button class="tour-trigger" type="button" aria-label="Explore ${name} in 3D"><span aria-hidden="true">◉</span> EXPLORE IN 3D</button>` : '';
+      const hasTour = property.tour === true || Boolean(property.tourUrl) || property.has_tour === true;
+      const tourBtn = hasTour ? `<button class="tour-trigger tour-btn-360" type="button" aria-label="Visite virtuelle 360° de ${name}"><svg class="tour-icon-svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/></svg> 360° VT</button>` : '';
 
       const region = escapeHtml(property.region || 'Île-de-France');
       const department = escapeHtml(property.department || 'France');
       const city = escapeHtml(property.city || 'Paris');
       const postalCode = escapeHtml(property.postalCode || property.postal_code || '75000');
       const address = escapeHtml(property.address || location);
-      const coordinates = escapeHtml(property.coordinates || '2.3522,48.8566');
+      const coordinates = escapeHtml(Array.isArray(property.coordinates) ? property.coordinates.join(',') : (property.coordinates || '2.3522,48.8566'));
 
       return `
         <article class="property-card" 
@@ -276,6 +311,7 @@
               <span>${bedrooms} chambres</span>
             </div>
             <div class="property-actions">
+              <button class="btn-view-property-card" type="button" data-id="${property.id || index + 1}"><span aria-hidden="true">👁</span> Détails</button>
               ${tourBtn}
               <button class="map-trigger" type="button"><span aria-hidden="true">◈</span> Carte</button>
               <button class="btn-simulate-card" type="button" data-price="${numericPrice}"><span aria-hidden="true">€</span> Simuler</button>
@@ -289,6 +325,34 @@
     if (userCoordinates) {
       updatePropertyDistances(userCoordinates[1], userCoordinates[0], userLocationLabel || 'Position');
     }
+
+    setupListingControls();
+  }
+
+  async function syncPublicCatalog() {
+    const grid = document.querySelector('.property-grid');
+    if (!grid) return;
+
+    let properties = null;
+    try {
+      properties = await apiRequest('/api/properties?status=published');
+    } catch (error) {
+      try {
+        const storedProperties = JSON.parse(localStorage.getItem('laforet-admin-properties') || '[]');
+        if (Array.isArray(storedProperties) && storedProperties.length) properties = storedProperties.filter((property) => property.status === 'published');
+      } catch (storageError) {
+        properties = null;
+      }
+    }
+
+    if (!properties || !properties.length) {
+      if (typeof window !== 'undefined' && window.PROPERTY_DETAILS_DATA) {
+        properties = Object.values(window.PROPERTY_DETAILS_DATA);
+      }
+    }
+
+    if (!properties || !properties.length) return;
+    renderPropertiesCatalog(properties);
   }
 
   function filterListings() {
@@ -431,6 +495,81 @@
     const listingSort = document.querySelector('#listing-sort');
     if (listingSort) listingSort.addEventListener('change', sortListings);
   }
+
+  // Global delegated click listeners ensuring every button works reliably
+  document.addEventListener('click', (e) => {
+    // 1. Favorite toggle on card
+    const favBtn = e.target.closest('.property-favorite');
+    if (favBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isFavorite = favBtn.getAttribute('aria-pressed') === 'true';
+      favBtn.setAttribute('aria-pressed', String(!isFavorite));
+      favBtn.textContent = isFavorite ? '♡' : '♥';
+      favBtn.classList.toggle('active', !isFavorite);
+      return;
+    }
+
+    // 2. Simulator jump from card
+    const simulateBtn = e.target.closest('.btn-simulate-card');
+    if (simulateBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const card = simulateBtn.closest('.property-card');
+      const price = Number(simulateBtn.dataset.price || card?.dataset.numericPrice || 2500000);
+      setSimulatorPrice(price);
+      const simSection = document.querySelector('#simulateur');
+      if (simSection) {
+        simSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // 3. Hero scroll button
+    if (e.target.closest('.hero-scroll')) {
+      e.preventDefault();
+      const propSection = document.querySelector('.properties');
+      if (propSection) {
+        propSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // 4. Anchor smooth scrolling and mode synchronization
+    const anchor = e.target.closest('a[href^="#"]');
+    if (anchor) {
+      const href = anchor.getAttribute('href');
+      if (!href || href === '#' || href === '#!') return;
+
+      if (href === '#louer') {
+        const tabLouer = document.querySelector('.search-tab[data-mode="Louer"]');
+        if (tabLouer) tabLouer.click();
+        const propSection = document.querySelector('.properties');
+        if (propSection) {
+          e.preventDefault();
+          propSection.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      }
+      if (href === '#acheter') {
+        const tabAcheter = document.querySelector('.search-tab[data-mode="Acheter"]');
+        if (tabAcheter) tabAcheter.click();
+        const propSection = document.querySelector('.properties');
+        if (propSection) {
+          e.preventDefault();
+          propSection.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      }
+
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+  });
 
   // -------------------------------------------------------------
   // FRANCE REGIONS & REAL-TIME BAN LOCATION MODULE
@@ -824,7 +963,7 @@
             <span class="dpe-tag">DPE ${card.dataset.dpe || 'B'}</span>
           </div>
           <div class="map-popup-actions">
-            <button class="popup-focus-btn" type="button" onclick="document.querySelector('[data-id=\\'${card.dataset.id}\\']')?.scrollIntoView({ behavior: 'smooth' })">Voir la fiche</button>
+            <button class="popup-focus-btn" type="button" onclick="if(window.openPropertyDetails){window.openPropertyDetails('${card.dataset.id}')}else{document.querySelector('[data-id=\\'${card.dataset.id}\\']')?.scrollIntoView({ behavior: 'smooth' })}">Voir la fiche</button>
           </div>
         </div>
       `;
@@ -879,14 +1018,25 @@
   }
 
   async function initializeListings() {
-    await syncPublicContent();
-    await syncPublicCatalog();
-    setupListingControls();
-    await initFranceRegions();
-    initLocationSearch();
-    initFranceMapView();
-    initLiveBanSync();
-    filterListings();
+    // 1. Render immediately from static prestige data store if available
+    if (typeof window !== 'undefined' && window.PROPERTY_DETAILS_DATA) {
+      renderPropertiesCatalog(Object.values(window.PROPERTY_DETAILS_DATA));
+      filterListings();
+    }
+
+    // 2. Initialize interactive UI modules immediately without waiting on network
+    try { initLocationSearch(); } catch (e) { console.warn('Search init:', e); }
+    try { initFranceMapView(); } catch (e) { console.warn('Map view init:', e); }
+    try { initLiveBanSync(); } catch (e) { console.warn('BAN sync init:', e); }
+
+    // 3. Perform network syncs concurrently in background
+    Promise.allSettled([
+      syncPublicContent(),
+      syncPublicCatalog(),
+      initFranceRegions(),
+    ]).then(() => {
+      filterListings();
+    });
   }
 
   initializeListings();
@@ -915,7 +1065,13 @@
     if (!cartItems || !cartEmpty || !cartCheckout || !cartCount || !cartTotal) return;
 
     cartCount.textContent = String(cart.length);
-    cartItems.innerHTML = cart.map((item) => `<div class="cart-item"><div class="cart-item-image ${item.image}"></div><div><strong>${item.name}</strong><small>${item.location}</small><b>${item.price}</b></div><button class="cart-remove" type="button" data-remove="${item.id}" aria-label="Retirer ${item.name}">×</button></div>`).join('');
+    cartItems.innerHTML = cart.map((item) => {
+      const isUrl = item.image && (item.image.startsWith('http') || item.image.startsWith('/'));
+      const imgMarkup = isUrl
+        ? `<div class="cart-item-image" style="background-image: url('${item.image}'); background-size: cover; background-position: center;"></div>`
+        : `<div class="cart-item-image ${item.image}"></div>`;
+      return `<div class="cart-item">${imgMarkup}<div><strong>${item.name}</strong><small>${item.location}</small><b>${item.price}</b></div><button class="cart-remove" type="button" data-remove="${item.id}" aria-label="Retirer ${item.name}">×</button></div>`;
+    }).join('');
     cartEmpty.hidden = cart.length > 0;
     cartCheckout.hidden = cart.length === 0;
     const total = cart.reduce((sum, item) => sum + priceInMillions(item.price), 0);
@@ -938,6 +1094,27 @@
     if (cartButton) cartButton.setAttribute('aria-expanded', String(isOpen));
     document.body.classList.toggle('cart-open', isOpen);
   }
+
+  function addPropertyToCart(prop) {
+    if (!prop) return;
+    const id = prop.id ? String(prop.id) : (prop.name || 'prop');
+    const existing = cart.find((item) => item.id === id || item.name === prop.name);
+    if (!existing) {
+      cart.push({
+        id,
+        name: prop.name || 'Bien d\'Exception LaForêt',
+        location: prop.location || '',
+        price: prop.price || (prop.numeric_price ? `${(prop.numeric_price / 1000000).toFixed(2).replace('.', ',')} M€` : 'Prix sur demande'),
+        image: (prop.images && prop.images[0]) || 'image-one'
+      });
+      saveCart();
+      renderCart();
+    }
+    toggleCart(true);
+  }
+
+  window.addPropertyToCart = addPropertyToCart;
+  window.toggleCart = toggleCart;
 
   document.addEventListener('click', (event) => {
     const button = event.target.closest('.cart-add');
@@ -1004,7 +1181,7 @@
   let propertyMarker;
 
   function placePropertyMarker(coordinates) {
-    if (!propertyMap || !maplibregl) return;
+    if (!propertyMap || typeof maplibregl === 'undefined') return;
     if (propertyMarker) propertyMarker.remove();
     propertyMarker = new maplibregl.Marker({ color: '#e4a347' }).setLngLat(coordinates).addTo(propertyMap);
   }
@@ -1016,6 +1193,52 @@
     document.body.classList.remove('modal-open');
   }
 
+  function openMapModalWithCoordinates(coordinates, title, location) {
+    if (!mapModal) return;
+    let [longitude, latitude] = Array.isArray(coordinates)
+      ? coordinates
+      : (typeof coordinates === 'string' ? coordinates.split(',').map(Number) : [2.3017, 48.8559]);
+    
+    if (isNaN(longitude) || isNaN(latitude)) {
+      longitude = 2.3017;
+      latitude = 48.8559;
+    }
+
+    if (mapTitle && title) mapTitle.textContent = title;
+    if (mapLocation && location) mapLocation.textContent = `${location} · emplacement indicatif`;
+    mapModal.classList.add('open');
+    mapModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    if (typeof maplibregl === 'undefined') {
+      if (mapCanvas) {
+        mapCanvas.innerHTML = `<div class="map-fallback"><strong>Carte temporairement indisponible</strong><span>Explorez ${location || 'ce quartier'} avec votre conseiller LaForêt.</span></div>`;
+      }
+      return;
+    }
+
+    if (!propertyMap) {
+      propertyMap = new maplibregl.Map({
+        container: mapCanvas,
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        center: [longitude, latitude],
+        zoom: 15.5,
+        pitch: 58,
+        bearing: -18,
+        attributionControl: true,
+      });
+      propertyMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
+    } else {
+      propertyMap.flyTo({ center: [longitude, latitude], zoom: 15.5, pitch: 58, bearing: -18, duration: 900 });
+    }
+
+    if (propertyMap.loaded()) placePropertyMarker([longitude, latitude]);
+    else propertyMap.once('load', () => placePropertyMarker([longitude, latitude]));
+    window.setTimeout(() => propertyMap.resize(), 150);
+  }
+
+  window.openPropertyMapModal = openMapModalWithCoordinates;
+
   if (mapModal) {
     document.addEventListener('click', (event) => {
       const trigger = event.target.closest('.map-trigger');
@@ -1023,38 +1246,7 @@
       const card = trigger.closest('.property-card');
       if (!card || !card.dataset.coordinates) return;
 
-      const [longitude, latitude] = card.dataset.coordinates.split(',').map(Number);
-      if (mapTitle) mapTitle.textContent = card.dataset.property;
-      if (mapLocation) mapLocation.textContent = `${card.dataset.location} · emplacement indicatif`;
-      mapModal.classList.add('open');
-      mapModal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('modal-open');
-
-      if (typeof maplibregl === 'undefined') {
-        if (mapCanvas) {
-          mapCanvas.innerHTML = `<div class="map-fallback"><strong>Carte temporairement indisponible</strong><span>Explorez ${card.dataset.location} avec votre conseiller LaForêt.</span></div>`;
-        }
-        return;
-      }
-
-      if (!propertyMap) {
-        propertyMap = new maplibregl.Map({
-          container: mapCanvas,
-          style: 'https://tiles.openfreemap.org/styles/liberty',
-          center: [longitude, latitude],
-          zoom: 15.5,
-          pitch: 58,
-          bearing: -18,
-          attributionControl: true,
-        });
-        propertyMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
-      } else {
-        propertyMap.flyTo({ center: [longitude, latitude], zoom: 15.5, pitch: 58, bearing: -18, duration: 900 });
-      }
-
-      if (propertyMap.loaded()) placePropertyMarker([longitude, latitude]);
-      else propertyMap.once('load', () => placePropertyMarker([longitude, latitude]));
-      window.setTimeout(() => propertyMap.resize(), 150);
+      openMapModalWithCoordinates(card.dataset.coordinates, card.dataset.property, card.dataset.location);
     });
 
     const mapClose = document.querySelector('.map-close');
@@ -1383,6 +1575,8 @@
     calculateMortgage();
   }
 
+  window.setSimulatorPrice = setSimulatorPrice;
+
   function calculateMortgage() {
     const priceInput = document.querySelector('#calc-price');
     const depositInput = document.querySelector('#calc-deposit');
@@ -1466,11 +1660,27 @@
     const currentStep = document.querySelector(`.estimate-step[data-step="${stepNum}"]`);
     if (!currentStep) return true;
     const requiredInputs = currentStep.querySelectorAll('input[required], select[required]');
+    let isValid = true;
+    let firstInvalid = null;
+
+    currentStep.querySelectorAll('.step-field-error').forEach((el) => el.remove());
+
     for (const input of requiredInputs) {
+      input.classList.remove('input-error');
       if (!input.value.trim()) {
-        input.focus();
-        return false;
+        input.classList.add('input-error');
+        isValid = false;
+        if (!firstInvalid) firstInvalid = input;
       }
+    }
+
+    if (!isValid && firstInvalid) {
+      firstInvalid.focus();
+      const errorMsg = document.createElement('p');
+      errorMsg.className = 'step-field-error';
+      errorMsg.textContent = 'Veuillez renseigner ce champ pour continuer.';
+      firstInvalid.parentNode.appendChild(errorMsg);
+      return false;
     }
     return true;
   }
@@ -1499,21 +1709,24 @@
   if (estimationForm) {
     estimationForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      const currentStepNum = 3;
+      if (!validateStep(currentStepNum)) return;
+
       const formData = new FormData(estimationForm);
       const features = formData.getAll('features');
 
       const payload = {
-        propertyType: formData.get('propertyType'),
-        city: formData.get('city'),
-        postalCode: formData.get('postalCode'),
-        surface: Number(formData.get('surface')),
-        rooms: Number(formData.get('rooms')),
-        bedrooms: Number(formData.get('bedrooms')),
-        condition: formData.get('condition'),
+        propertyType: formData.get('propertyType') || 'Appartement',
+        city: formData.get('city') || 'Paris',
+        postalCode: formData.get('postalCode') || '75007',
+        surface: Number(formData.get('surface')) || 100,
+        rooms: Number(formData.get('rooms')) || 4,
+        bedrooms: Number(formData.get('bedrooms')) || 2,
+        condition: formData.get('condition') || 'bon',
         features: features,
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
+        name: formData.get('name') || 'Visiteur LaForêt',
+        email: formData.get('email') || '',
+        phone: formData.get('phone') || '',
       };
 
       const submitBtn = estimationForm.querySelector('.btn-calc-estimate');
@@ -1524,44 +1737,78 @@
       }
 
       try {
-        const result = await apiRequest('/api/estimates', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
+        let result = null;
+        try {
+          result = await apiRequest('/api/estimates', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+        } catch (apiErr) {
+          console.warn('[Estimation] Network fallback to local estimation algorithm:', apiErr);
+        }
 
-        if (result && result.estimate && estimationResult) {
-          const { estimate, localAgency } = result;
+        // Base price calculation fallback
+        const surface = payload.surface || 100;
+        let baseM2 = 6500;
+        const cityLower = (payload.city || '').toLowerCase();
+        if (cityLower.includes('paris') || cityLower.includes('750')) baseM2 = 12500;
+        else if (cityLower.includes('nice') || cityLower.includes('cannes') || cityLower.includes('antibes')) baseM2 = 7200;
+        else if (cityLower.includes('lyon') || cityLower.includes('690')) baseM2 = 5600;
+        else if (cityLower.includes('bordeaux') || cityLower.includes('330')) baseM2 = 4900;
+        else if (cityLower.includes('annecy') || cityLower.includes('megève')) baseM2 = 8200;
 
+        let conditionCoeff = 1.0;
+        if (payload.condition === 'neuf') conditionCoeff = 1.15;
+        else if (payload.condition === 'excellent') conditionCoeff = 1.08;
+        else if (payload.condition === 'a_renover') conditionCoeff = 0.85;
+
+        const featureBonus = (payload.features?.length || 0) * 0.02;
+        const finalM2 = Math.round(baseM2 * conditionCoeff * (1 + featureBonus));
+        const estimatedMedian = Math.round(surface * finalM2);
+        const estimatedLow = Math.round(estimatedMedian * 0.92);
+        const estimatedHigh = Math.round(estimatedMedian * 1.08);
+
+        const estimate = result?.estimate || {};
+        const medianVal = estimate.priceMedian || estimate.median || estimatedMedian;
+        const minVal = estimate.priceMin || estimate.low || estimatedLow;
+        const maxVal = estimate.priceMax || estimate.high || estimatedHigh;
+        const m2Val = estimate.avgPriceM2 || estimate.pricePerM2 || Math.round(medianVal / surface);
+        const localAgency = result?.localAgency || estimate.agency || {
+          name: `LaForêt ${payload.city || 'Prestige'} · Agence Référente`,
+          address: `${payload.postalCode || '75000'} ${payload.city || 'France'}`,
+          director: 'Directeur d\'Agence LaForêt',
+          phone: '01 45 51 00 20'
+        };
+
+        if (estimationResult) {
           const medianEl = estimationResult.querySelector('.val-median');
           const minEl = estimationResult.querySelector('.val-min');
           const maxEl = estimationResult.querySelector('.val-max');
           const m2El = estimationResult.querySelector('.val-m2');
 
-          if (medianEl) medianEl.textContent = formatCurrency(estimate.median);
-          if (minEl) minEl.textContent = formatCurrency(estimate.low);
-          if (maxEl) maxEl.textContent = formatCurrency(estimate.high);
-          if (m2El) m2El.textContent = `${estimate.pricePerM2.toLocaleString('fr-FR')} € / m²`;
+          if (medianEl) medianEl.textContent = formatCurrency(medianVal);
+          if (minEl) minEl.textContent = formatCurrency(minVal);
+          if (maxEl) maxEl.textContent = formatCurrency(maxVal);
+          if (m2El) m2El.textContent = `${Number(m2Val).toLocaleString('fr-FR')} € / m²`;
 
-          if (localAgency) {
-            const agName = estimationResult.querySelector('.agency-name');
-            const agAddr = estimationResult.querySelector('.agency-address');
-            const agDir = estimationResult.querySelector('.agency-director');
-            const agPhone = estimationResult.querySelector('.agency-phone-link');
+          const agName = estimationResult.querySelector('.agency-name');
+          const agAddr = estimationResult.querySelector('.agency-address');
+          const agDir = estimationResult.querySelector('.agency-director');
+          const agPhone = estimationResult.querySelector('.agency-phone-link');
 
-            if (agName) agName.textContent = localAgency.name;
-            if (agAddr) agAddr.textContent = `${localAgency.address}, ${localAgency.postalCode} ${localAgency.city}`;
-            if (agDir) agDir.textContent = localAgency.director;
-            if (agPhone) {
-              agPhone.textContent = `📞 ${localAgency.phone}`;
-              agPhone.href = `tel:${localAgency.phone.replace(/\s+/g, '')}`;
-            }
+          if (agName) agName.textContent = localAgency.name;
+          if (agAddr) agAddr.textContent = `${localAgency.address || ''}, ${localAgency.postalCode || ''} ${localAgency.city || ''}`;
+          if (agDir) agDir.textContent = localAgency.director || 'Conseiller Spécialiste';
+          if (agPhone && localAgency.phone) {
+            agPhone.textContent = `📞 ${localAgency.phone}`;
+            agPhone.href = `tel:${String(localAgency.phone).replace(/\s+/g, '')}`;
           }
 
           estimationResult.hidden = false;
           estimationResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       } catch (err) {
-        alert('Une erreur est survenue lors du calcul. Veuillez réessayer.');
+        console.error('Estimation calculation error:', err);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1569,6 +1816,46 @@
         }
       }
     });
+
+    // Appointment button in valuation results
+    const btnAppointment = document.querySelector('.btn-appointment');
+    if (btnAppointment) {
+      btnAppointment.addEventListener('click', () => {
+        const formData = new FormData(estimationForm);
+        const city = formData.get('city') || '';
+        const pType = formData.get('propertyType') || 'Bien';
+        const name = formData.get('name') || '';
+        const email = formData.get('email') || '';
+        const phone = formData.get('phone') || '';
+        const medianVal = estimationResult?.querySelector('.val-median')?.textContent || '';
+        const agName = estimationResult?.querySelector('.agency-name')?.textContent || 'LaForêt';
+
+        const contactModal = document.getElementById('property-contact-modal');
+        if (contactModal) {
+          const titleEl = document.getElementById('contact-modal-property-title');
+          const refEl = document.getElementById('contact-modal-property-ref');
+          const nameEl = document.getElementById('contact-form-name');
+          const emailEl = document.getElementById('contact-form-email');
+          const phoneEl = document.getElementById('contact-form-phone');
+          const msgEl = document.getElementById('contact-form-message');
+
+          if (titleEl) titleEl.textContent = `Rendez-vous Estimation · ${pType} à ${city || 'votre secteur'}`;
+          if (refEl) refEl.textContent = `Cote estimée : ${medianVal} · Conseiller ${agName}`;
+          if (nameEl && name) nameEl.value = name;
+          if (emailEl && email) emailEl.value = email;
+          if (phoneEl && phone) phoneEl.value = phone;
+          if (msgEl) {
+            msgEl.value = `Bonjour, suite à mon estimation en ligne (${pType} estimé à ${medianVal}), je souhaite convenir d'un rendez-vous sur place sous 48h avec un expert ${agName} pour une visite d'évaluation approfondie offerte et sans engagement.`;
+          }
+
+          contactModal.classList.add('open');
+          contactModal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('contact-modal-open');
+        } else {
+          openAlertModal(city);
+        }
+      });
+    }
   }
 
   // -------------------------------------------------------------

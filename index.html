@@ -3,14 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LaForêt Immobilier - Des adresses qui vous ressemblent." />
-    <title>LaForêt Immobilier | Des adresses qui vous ressemblent</title>
+    <meta name="description" content="Portail immobilier LaForêt : estimation en ligne immédiate, simulateur de prêt, réseau de 720 agences, Mandat Favoriz, DPE et visites virtuelles 3D." />
+    <meta property="og:title" content="LaForêt Immobilier" />
+    <meta property="og:description" content="Portail immobilier LaForêt : estimation en ligne immédiate, simulateur de prêt, réseau de 720 agences, Mandat Favoriz, DPE et visites virtuelles 3D." />
+    <title>LaForêt Immobilier</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
     <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="virtual-tour.css" />
+    <link rel="stylesheet" href="property-details.css" />
     <script type="importmap">
       {
         "imports": {
@@ -37,7 +40,7 @@
       <div class="language-switcher" aria-label="Choisir la langue"><span>Langue</span><div id="google_translate_element"></div></div>
       <a class="header-action" href="#estimer">Estimer mon bien <span aria-hidden="true">↗</span></a>
       <button class="cart-button" type="button" aria-label="Ouvrir le panier" aria-expanded="false"><span aria-hidden="true">▱</span><b class="cart-count">0</b></button>
-      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span></button>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false"><span></span><span></span><span></span></button>
       <div class="mobile-menu">
         <a href="#acheter">Acheter un bien</a>
         <a href="#louer">Louer un bien</a>
@@ -64,7 +67,7 @@
           </div>
         </div>
         <div class="hero-bottom">
-          <div class="hero-scroll"><span></span> Découvrir</div>
+          <button class="hero-scroll" type="button" aria-label="Découvrir le catalogue LaForêt"><span></span> Découvrir</button>
           <div class="hero-location">La vie est belle<br /><span>partout où l'on se sent chez soi</span></div>
         </div>
       </section>
@@ -648,10 +651,360 @@
     <aside class="cart-drawer" aria-label="Panier de réservation" aria-hidden="true"><div class="cart-head"><div><p class="eyebrow dark">Votre sélection</p><h2>Panier</h2></div><button class="cart-close" type="button" aria-label="Fermer le panier">×</button></div><div class="cart-items"></div><div class="cart-empty"><span>▱</span><strong>Votre panier est vide</strong><p>Ajoutez un bien pour commencer votre demande de réservation.</p></div><div class="cart-checkout"><div class="cart-total"><span>Total indicatif</span><strong class="cart-total-value">0 €</strong></div><p class="cart-note">Un conseiller confirmera les détails et les modalités avant tout paiement définitif.</p><form class="checkout-form"><label>Votre email<input type="email" placeholder="vous@exemple.fr" required /></label><fieldset><legend>Mode de paiement préféré</legend><label class="payment-option"><input type="radio" name="payment" value="card" checked /><span>▣</span> Carte bancaire</label><label class="payment-option"><input type="radio" name="payment" value="paypal" /><span>◉</span> PayPal</label><label class="payment-option"><input type="radio" name="payment" value="apple" /><span>●</span> Apple Pay</label><label class="payment-option"><input type="radio" name="payment" value="transfer" /><span>↗</span> Virement bancaire</label></fieldset><div class="card-fields"><label>Numéro de carte<input inputmode="numeric" placeholder="0000 0000 0000 0000" /></label><div><label>Expiration<input placeholder="MM / AA" /></label><label>CVV<input inputmode="numeric" placeholder="000" /></label></div></div><button class="checkout-button" type="submit">Continuer la demande <span>↗</span></button></form></div></aside><div class="cart-backdrop"></div>
     <div class="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-title" aria-hidden="true"><div class="map-backdrop"></div><div class="map-panel"><div class="map-panel-head"><div><p class="eyebrow dark">Explorer le quartier</p><h2 id="map-title">Vue 3D</h2><p class="map-location"></p></div><button class="map-close" type="button" aria-label="Fermer la carte">×</button></div><div class="map-canvas" aria-label="Carte 3D interactive"></div><div class="map-panel-foot"><span><i></i> Emplacement indicatif</span><small>Inclinez et faites pivoter la carte pour explorer les environs</small></div></div></div>
     <div class="tour-modal" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-hidden="true"><div class="tour-backdrop"></div><div class="tour-panel"><div class="tour-header"><div><p class="eyebrow">Visite immersive</p><h2 id="tour-title">Visite 3D</h2><p class="tour-location"></p></div><button class="tour-close" type="button" aria-label="Fermer la visite">×</button></div><div class="tour-tabs" role="tablist" aria-label="Pièces et vues"><button class="tour-tab active" type="button" data-scene="exterior">Extérieur</button><button class="tour-tab" type="button" data-scene="interior">Intérieur</button><button class="tour-tab" type="button" data-scene="surroundings">Alentours</button></div><div class="tour-stage"><div class="tour-scene exterior-scene active visible"><span class="tour-badge">Vue extérieure · 01 / 03</span><button class="tour-hotspot hotspot-garden" type="button" data-detail="Jardin paysager · terrasse plein sud">1</button><button class="tour-hotspot hotspot-entrance" type="button" data-detail="Entrée principale · accès sécurisé">2</button></div><div class="tour-scene interior-scene"><span class="tour-badge">Vue intérieure · 02 / 03</span><button class="tour-hotspot hotspot-living" type="button" data-detail="Séjour traversant · lumière naturelle">1</button><button class="tour-hotspot hotspot-kitchen" type="button" data-detail="Cuisine ouverte · équipements intégrés">2</button></div><div class="tour-scene surroundings-scene"><span class="tour-badge">Quartier · 03 / 03</span><div class="surroundings-copy"><span>À proximité</span><strong>Vivre ici, au rythme du quartier</strong><small>Transports, commerces et nature à quelques minutes.</small></div></div><p class="tour-detail" aria-live="polite">Sélectionnez un point pour découvrir les détails du bien.</p></div><div class="tour-footer"><button class="tour-prev" type="button">← Vue précédente</button><span class="tour-progress">01 / 03</span><button class="tour-next" type="button">Vue suivante →</button></div></div></div>
+
+    <!-- =====================================================================
+         UPGRADED PROPERTY DETAILS PRESENTATION (Reference Design)
+         ===================================================================== -->
+    <div id="property-detail-view" class="property-detail-view" role="region" aria-label="Fiche détaillée du bien" aria-hidden="true">
+      <nav class="detail-top-nav" aria-label="Navigation fiche bien">
+        <div class="detail-nav-inner">
+          <button id="btn-detail-back" class="btn-detail-back" type="button" aria-label="Retour au catalogue">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span>Retour aux annonces</span>
+          </button>
+          <div class="detail-nav-brand">
+            <img class="detail-nav-logo" src="laforet-logo.svg" alt="LaForêt Prestige" />
+            <span class="detail-nav-tag">Prestige</span>
+          </div>
+          <div class="detail-nav-actions">
+            <button class="btn-nav-contact-quick btn-trigger-contact-drawer" type="button">Nous contacter</button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="property-detail-container">
+        <!-- 3. TOP ACTION BUTTONS (Reference Design) -->
+        <div class="property-top-actions">
+          <div class="action-button-group">
+            <button id="btn-action-tour" class="paction-btn paction-tour" type="button" aria-label="Lancer la visite virtuelle 360°">
+              <svg class="paction-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/></svg>
+              <span>360° VT</span>
+            </button>
+            <button id="btn-action-photos" class="paction-btn paction-photos" type="button" aria-label="Consulter toutes les photographies">
+              <svg class="paction-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span id="action-photos-label">Photos (10)</span>
+            </button>
+            <button id="btn-action-map" class="paction-btn paction-map" type="button" aria-label="Afficher la carte et le quartier">
+              <svg class="paction-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              <span>Map</span>
+            </button>
+          </div>
+          <div class="action-button-group action-button-row2">
+            <button id="btn-action-brochure" class="paction-btn paction-brochure" type="button" aria-label="Consulter le dossier PDF">
+              <svg class="paction-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Brochure</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. HERO IMAGE GALLERY -->
+        <div class="hero-gallery-wrapper">
+          <div class="hero-gallery-viewport" id="hero-gallery-viewport">
+            <img id="hero-main-img" class="hero-main-image" src="" alt="Vue principale du bien" />
+            <div class="gallery-badge-counter" id="hero-photo-counter">1 / 10</div>
+            <button class="gallery-nav-btn btn-hero-prev" id="btn-hero-prev" type="button" aria-label="Photo précédente">‹</button>
+            <button class="gallery-nav-btn btn-hero-next" id="btn-hero-next" type="button" aria-label="Photo suivante">›</button>
+            <div class="hero-gallery-actions">
+              <button class="hero-action-icon" id="btn-hero-favorite" type="button" title="Ajouter aux favoris" aria-label="Ajouter aux favoris">♡</button>
+              <button class="hero-action-icon" id="btn-hero-share" type="button" title="Partager ce bien" aria-label="Partager ce bien">↗</button>
+              <button class="hero-action-icon" id="btn-hero-zoom" type="button" title="Agrandir">🔍</button>
+              <button class="hero-action-icon" id="btn-hero-fullscreen" type="button" title="Plein écran">⛶</button>
+            </div>
+          </div>
+          <div class="hero-thumbnails-ribbon" id="hero-thumbnails-ribbon"></div>
+        </div>
+
+        <!-- 4. PROPERTY TITLE AND SPECIFICATIONS -->
+        <header class="property-info-header">
+          <div class="property-badge-row">
+            <span class="pbadge pbadge-type" id="badge-property-type">Hôtel particulier</span>
+            <span class="pbadge pbadge-ref" id="badge-ref-number">Réf. LF-75007-01</span>
+            <span class="pbadge pbadge-favoriz">Mandat Favoriz Exclusif</span>
+          </div>
+          <h1 class="property-detail-title" id="property-detail-title">Hôtel Particulier Champ-de-Mars</h1>
+          <p class="property-detail-location" id="property-detail-location">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Paris 7e · Champ-de-Mars</span>
+          </p>
+          <div class="property-detail-price-wrap">
+            <span class="price-val" id="property-detail-price">9 850 000 €</span>
+            <span class="price-m2" id="property-detail-price-m2">25 584 € / m²</span>
+            <span class="price-rent" id="property-detail-rent">Location estimée : 24 500 € / mois</span>
+            <div class="property-price-actions-cta">
+              <button id="btn-detail-simulate" class="btn-detail-cta-action" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                <span>Simuler le financement</span>
+              </button>
+              <button id="btn-detail-reserve" class="btn-detail-cta-action btn-detail-reserve-act" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span>Poser une option</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="property-specs-ribbon">
+            <div class="spec-pill">
+              <span class="spec-icon">▱</span>
+              <strong id="spec-area">385 m²</strong>
+              <span>Surface habitable</span>
+            </div>
+            <div class="spec-pill">
+              <span class="spec-icon">▣</span>
+              <strong id="spec-rooms">9</strong>
+              <span>Pièces</span>
+            </div>
+            <div class="spec-pill">
+              <span class="spec-icon">🛏</span>
+              <strong id="spec-bedrooms">5</strong>
+              <span>Chambres</span>
+            </div>
+            <div class="spec-pill">
+              <span class="spec-icon">🚿</span>
+              <strong id="spec-bathrooms">4</strong>
+              <span>Salles d'eau</span>
+            </div>
+            <div class="spec-pill">
+              <span class="spec-icon">☀️</span>
+              <strong id="spec-exposure">Sud-Ouest</strong>
+              <span>Exposition</span>
+            </div>
+            <div class="spec-pill">
+              <span class="spec-icon">⚡</span>
+              <strong id="spec-dpe">Classe A</strong>
+              <span>DPE</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- 4. PROPERTY DESCRIPTION WITH READ FULL BUTTON -->
+        <article class="property-description-card">
+          <h3>Présentation du bien</h3>
+          <div class="desc-preview" id="desc-preview-text"></div>
+          <div class="desc-expanded" id="desc-expanded-text" style="display: none;"></div>
+          <button id="btn-toggle-desc" class="btn-toggle-desc" type="button">
+            <span class="desc-btn-text">Lire la description complète</span>
+            <span class="desc-btn-icon">▾</span>
+          </button>
+        </article>
+
+        <!-- 5. CONTACT US (Large Rounded Button) -->
+        <div class="contact-us-action-block">
+          <button id="btn-property-contact-us" class="btn-large-contact" type="button">
+            <span>Contact us</span>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+
+        <!-- 6. AGENT / PROPERTY CONTACT SECTION (Reference Design) -->
+        <section class="property-agent-section" id="property-agent-section">
+          <div class="agent-greeting-wrap">
+            <span class="agent-greeting-hi">Hi,</span>
+            <h2 class="agent-greeting-name">I’m <span id="agent-display-name">Marc-Antoine de Belloy</span>,</h2>
+            <p class="agent-greeting-sub">your local contact for this Property</p>
+            <p class="agent-greeting-fr-hint">Votre conseiller dédié LaForêt Immobilier Prestige</p>
+          </div>
+
+          <div class="agent-card-presentation">
+            <div class="agent-avatar-wrap">
+              <img id="agent-display-photo" class="agent-avatar-img" src="" alt="Portrait de l'agent" loading="lazy" />
+              <span class="agent-status-badge">● Conseiller disponible</span>
+            </div>
+            <div class="agent-info-wrap">
+              <h3 id="agent-card-name" class="agent-profile-name">Marc-Antoine de Belloy</h3>
+              <p id="agent-card-title" class="agent-profile-title">Directeur d'Agence · Spécialiste Prestige</p>
+              <div class="agent-rating-line">
+                <span class="agent-stars">★★★★★</span>
+                <strong id="agent-rating-value">4.9</strong>
+                <span id="agent-reviews-count" class="agent-reviews-text">(184 avis certifiés)</span>
+              </div>
+              <div class="agent-company-details">
+                <p id="agent-agency-name" class="agent-agency-name">LaForêt Paris 7e · Champ-de-Mars & Invalides</p>
+                <p id="agent-agency-address" class="agent-agency-address">14 bis Avenue Bosquet, 75007 Paris</p>
+                <div class="agent-quick-contacts">
+                  <a id="agent-phone-link" href="tel:0145510020" class="agent-contact-item">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <span id="agent-phone-text">01 45 51 00 20</span>
+                  </a>
+                  <a id="agent-email-link" href="mailto:paris7@laforet.com" class="agent-contact-item">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span id="agent-email-text">paris7@laforet.com</span>
+                  </a>
+                </div>
+              </div>
+              <div class="agent-actions-row">
+                <button id="btn-agent-contact" type="button" class="btn-agent-contact">Prendre rendez-vous</button>
+                <a id="agent-portfolio-link" href="#agences" class="agent-portfolio-link">Voir toutes les annonces de l'agence ↗</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. PROPERTY PHOTO GRID / VISUAL PRESENTATION (Adaptive) -->
+        <section class="property-photo-grid-section" id="property-photo-grid-section">
+          <div class="photo-grid-header">
+            <div>
+              <p class="eyebrow dark">Galerie Exclusive</p>
+              <h3>Découvrir le bien sous tous ses angles</h3>
+            </div>
+            <button class="btn-view-all-photos" type="button" id="btn-open-all-photos">
+              Voir toutes les photos (<span id="photo-grid-total-count">10</span>)
+            </button>
+          </div>
+          <div class="property-photo-grid" id="property-photo-grid"></div>
+        </section>
+
+        <!-- 8. ENERGY EFFICIENCY SECTION (DPE & GES) -->
+        <section class="property-energy-section" id="property-energy-section">
+          <div class="energy-section-header">
+            <p class="eyebrow dark">Bilan environnemental certifié</p>
+            <h3>ENERGY EFFICIENCY RATINGS</h3>
+            <p class="energy-subtitle">Diagnostic de Performance Énergétique (DPE) & Émissions de Gaz à Effet de Serre (GES)</p>
+          </div>
+
+          <div class="energy-charts-dual-grid">
+            <div class="energy-chart-card">
+              <div class="energy-chart-title">
+                <h4>Consommations énergétiques (DPE)</h4>
+                <span class="energy-metric-value"><strong id="dpe-numeric-val">48</strong> kWh/m²/an</span>
+              </div>
+              <div class="stepped-chart-container" id="dpe-stepped-chart"></div>
+            </div>
+
+            <div class="energy-chart-card">
+              <div class="energy-chart-title">
+                <h4>Émissions de gaz à effet de serre (GES)</h4>
+                <span class="energy-metric-value"><strong id="ges-numeric-val">9</strong> kg CO₂/m²/an</span>
+              </div>
+              <div class="stepped-chart-container" id="ges-stepped-chart"></div>
+            </div>
+          </div>
+
+          <div class="energy-summary-box">
+            <div class="energy-cost-info">
+              <p>Montant estimé des dépenses annuelles d'énergie : entre <strong id="energy-cost-min">1 250 €</strong> et <strong id="energy-cost-max">1 720 €</strong> / an</p>
+              <small>Prix moyens des énergies indexés au 1er janvier 2024 (abonnements compris).</small>
+            </div>
+            <button class="btn-energy-cert" id="btn-energy-cert" type="button">
+              Certificat officiel ADEME n° <span id="energy-cert-ref">LF-75007</span> ↗
+            </button>
+          </div>
+        </section>
+
+        <!-- Characteristics and detailed specs -->
+        <section class="property-features-section">
+          <h3>Prestations & Équipements de prestige</h3>
+          <ul class="property-features-list" id="property-features-list"></ul>
+          <div class="property-details-specs-table" id="property-details-specs-table"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         FULLSCREEN LIGHTBOX GALLERY
+         ===================================================================== -->
+    <div id="property-gallery-lightbox" class="property-gallery-lightbox" role="dialog" aria-modal="true" aria-label="Galerie photo plein écran" aria-hidden="true">
+      <div class="lightbox-header">
+        <div class="lightbox-counter" id="lightbox-counter">1 / 10</div>
+        <div class="lightbox-controls">
+          <button class="lightbox-ctrl-btn" id="btn-lightbox-zoom-out" type="button" title="Zoom arrière">−</button>
+          <button class="lightbox-ctrl-btn" id="btn-lightbox-zoom-in" type="button" title="Zoom avant">+</button>
+          <button class="lightbox-ctrl-btn" id="btn-lightbox-zoom-reset" type="button" title="Réinitialiser le zoom">1:1</button>
+          <button class="lightbox-ctrl-btn btn-lightbox-close" id="btn-lightbox-close" type="button" title="Fermer la galerie">×</button>
+        </div>
+      </div>
+      <div class="lightbox-stage">
+        <button class="lightbox-nav-btn btn-lightbox-prev" id="btn-lightbox-prev" type="button" aria-label="Photo précédente">‹</button>
+        <img id="lightbox-main-img" class="lightbox-main-img" src="" alt="Photographie agrandie" />
+        <button class="lightbox-nav-btn btn-lightbox-next" id="btn-lightbox-next" type="button" aria-label="Photo suivante">›</button>
+      </div>
+      <div class="lightbox-thumbnails-strip" id="lightbox-thumbnails-strip"></div>
+    </div>
+
+    <!-- =====================================================================
+         LUXURY PRINTABLE BROCHURE MODAL
+         ===================================================================== -->
+    <div id="property-brochure-modal" class="property-brochure-modal" role="dialog" aria-modal="true" aria-label="Brochure du bien" aria-hidden="true">
+      <div class="brochure-backdrop"></div>
+      <div class="brochure-dialog-container">
+        <div class="brochure-modal-topbar">
+          <span class="brochure-topbar-title">Dossier de Présentation Confidentiel</span>
+          <div class="brochure-topbar-actions">
+            <button id="btn-brochure-print" class="btn-brochure-print" type="button">Imprimer / PDF</button>
+            <button id="btn-brochure-close" class="btn-brochure-close" type="button" aria-label="Fermer">×</button>
+          </div>
+        </div>
+        <div class="brochure-sheet-scrollable" id="brochure-printable-sheet"></div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         PROPERTY IDENTIFIED CONTACT MODAL (Enquiry)
+         ===================================================================== -->
+    <div id="property-contact-modal" class="property-contact-modal" role="dialog" aria-modal="true" aria-label="Contacter l'agence pour ce bien" aria-hidden="true">
+      <div class="prop-contact-backdrop"></div>
+      <div class="prop-contact-dialog">
+        <div class="prop-contact-header">
+          <h3>Prendre contact pour ce bien</h3>
+          <p>Un conseiller dédié répond à toutes vos questions et organise votre visite privée.</p>
+          <div class="prop-identified-badge">
+            <strong id="contact-modal-property-title">Propriété</strong>
+            <span id="contact-modal-property-ref">Réf. LF-01</span>
+          </div>
+          <button id="btn-prop-contact-close" class="btn-contact-modal-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <div class="prop-contact-body">
+          <form id="property-contact-form">
+            <input type="hidden" id="contact-form-property-id" name="propertyId" value="" />
+            <div class="prop-form-group">
+              <label for="contact-form-name">Votre nom complet *</label>
+              <input class="prop-form-input" id="contact-form-name" type="text" name="name" placeholder="Mme / M. Jean Dupont" required />
+            </div>
+            <div class="prop-form-group">
+              <label for="contact-form-email">Adresse e-mail *</label>
+              <input class="prop-form-input" id="contact-form-email" type="email" name="email" placeholder="jean.dupont@exemple.fr" required />
+            </div>
+            <div class="prop-form-group">
+              <label for="contact-form-phone">Numéro de téléphone *</label>
+              <input class="prop-form-input" id="contact-form-phone" type="tel" name="phone" placeholder="06 12 34 56 78" required />
+            </div>
+            <div class="prop-form-group">
+              <label for="contact-form-message">Votre message</label>
+              <textarea class="prop-form-textarea" id="contact-form-message" name="message" rows="4"></textarea>
+            </div>
+            <button class="btn-submit-prop-inquiry" type="submit">Envoyer ma demande à l'agent</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         OFFICIAL ADEME ENERGY PERFORMANCE CERTIFICATE MODAL
+         ===================================================================== -->
+    <div id="property-energy-cert-modal" class="property-energy-cert-modal" role="dialog" aria-modal="true" aria-label="Certificat officiel ADEME DPE" aria-hidden="true">
+      <div class="energy-cert-backdrop"></div>
+      <div class="energy-cert-dialog">
+        <div class="energy-cert-header">
+          <div class="ademe-header-brand">
+            <span class="ademe-tag">RÉPUBLIQUE FRANÇAISE · ADEME</span>
+            <h3>Certificat Officiel de Performance Énergétique</h3>
+            <p>Observatoire National des Diagnostics de Performance Énergétique (DPE)</p>
+          </div>
+          <button id="btn-energy-cert-close" class="btn-energy-cert-close" type="button" aria-label="Fermer le certificat">×</button>
+        </div>
+        <div class="energy-cert-body" id="energy-cert-body">
+          <!-- Dynamically populated by property-details.js -->
+        </div>
+        <div class="energy-cert-footer">
+          <button id="btn-energy-cert-print" class="btn-energy-cert-print" type="button">Imprimer / Exporter le Certificat <span>🖨</span></button>
+          <button id="btn-energy-cert-dismiss" class="btn-energy-cert-dismiss" type="button">Fermer</button>
+        </div>
+      </div>
+    </div>
     <footer><a class="brand footer-brand" href="#accueil"><img class="official-logo" src="laforet-logo.svg" alt="LaForêt Immobilier" /></a><p>La vie est belle partout où l'on se sent chez soi.</p><div><a href="#contact">Contact</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a><a href="#contact">Mentions légales</a></div></footer>
-    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script src="property-details-data.js"></script>
     <script src="script.js"></script>
     <script type="module" src="virtual-tour.js"></script>
-    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="property-details.js"></script>
   </body>
 </html>

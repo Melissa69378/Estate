@@ -6,10 +6,10 @@
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "build": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js",
-    "lint": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js",
+    "build": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js && node --check property-details.js && node --check property-details-data.js",
+    "lint": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js && node --check property-details.js && node --check property-details-data.js",
     "start": "node server.js",
-    "check": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js"
+    "check": "node --check server.js && node --check script.js && node --check admin.js && node --check virtual-tour.js && node --check property-details.js && node --check property-details-data.js"
   },
   "engines": {
     "node": ">=20"
@@ -19,5 +19,8 @@
     "@photo-sphere-viewer/markers-plugin": "^5.15.1",
     "pg": "^8.13.1",
     "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
   }
 }
