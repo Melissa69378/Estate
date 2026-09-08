@@ -1064,6 +1064,292 @@
   }
 
   // -------------------------------------------------------------
+  // 3D TOUR MODAL (Scenes Cross-Fade Transition Controller)
+  // -------------------------------------------------------------
+  const tourModal = document.querySelector('.tour-modal');
+  if (tourModal) {
+    const tourTabs = Array.from(tourModal.querySelectorAll('.tour-tab'));
+    const tourScenes = Array.from(tourModal.querySelectorAll('.tour-stage .tour-scene'));
+    const tourProgress = tourModal.querySelector('.tour-progress');
+    const tourPrev = tourModal.querySelector('.tour-prev');
+    const tourNext = tourModal.querySelector('.tour-next');
+    const tourClose = tourModal.querySelector('.tour-close');
+    const tourBackdrop = tourModal.querySelector('.tour-backdrop');
+    const tourDetail = tourModal.querySelector('.tour-detail');
+    const tourStage = tourModal.querySelector('.tour-stage');
+    const tourTitle = tourModal.querySelector('#tour-title');
+    const tourLocation = tourModal.querySelector('.tour-location');
+    const allHotspots = Array.from(tourModal.querySelectorAll('.tour-hotspot'));
+
+    const sceneKeys = ['exterior', 'interior', 'surroundings'];
+    let currentSceneIndex = 0;
+    let isTransitioning = false;
+    let transitionTimer = null;
+
+    function getSceneElement(indexOrKey) {
+      if (typeof indexOrKey === 'number') {
+        const key = sceneKeys[indexOrKey];
+        return tourScenes.find(s => s.classList.contains(`${key}-scene`)) || tourScenes[indexOrKey];
+      }
+      return tourScenes.find(s => s.classList.contains(`${indexOrKey}-scene`));
+    }
+
+    function switchTourScene(target, direction = 0) {
+      let targetIndex = -1;
+      if (typeof target === 'number') {
+        targetIndex = target;
+      } else if (typeof target === 'string') {
+        targetIndex = sceneKeys.indexOf(target);
+      }
+
+      if (targetIndex < 0 || targetIndex >= sceneKeys.length) return;
+      if (targetIndex === currentSceneIndex && getSceneElement(targetIndex)?.classList.contains('active')) {
+        return;
+      }
+
+      // Determine forward (+1) or backward (-1) direction for smooth parallax
+      const dir = direction !== 0 ? direction : (targetIndex > currentSceneIndex ? 1 : -1);
+
+      const outgoingIndex = currentSceneIndex;
+      const outgoingScene = getSceneElement(outgoingIndex);
+      const incomingScene = getSceneElement(targetIndex);
+
+      if (!incomingScene) return;
+
+      if (transitionTimer) {
+        clearTimeout(transitionTimer);
+        transitionTimer = null;
+      }
+
+      isTransitioning = true;
+
+      // Update tabs active state
+      tourTabs.forEach((tab, idx) => {
+        const isActive = idx === targetIndex;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      // Update progress indicator
+      if (tourProgress) {
+        tourProgress.textContent = `0${targetIndex + 1} / 0${sceneKeys.length}`;
+      }
+
+      // Set directional classes for 3D parallax depth
+      tourScenes.forEach(s => s.classList.remove('dir-next', 'dir-prev'));
+
+      if (dir > 0) {
+        incomingScene.classList.add('dir-next');
+        outgoingScene?.classList.add('dir-next');
+      } else {
+        incomingScene.classList.add('dir-prev');
+        outgoingScene?.classList.add('dir-prev');
+      }
+
+      // Simultaneous cross-fade dissolve:
+      // 1. Outgoing scene fades out
+      if (outgoingScene && outgoingScene !== incomingScene) {
+        outgoingScene.classList.remove('active', 'visible');
+        outgoingScene.classList.add('leaving');
+      }
+
+      // 2. Incoming scene fades in
+      incomingScene.classList.remove('leaving');
+      void incomingScene.offsetWidth; // Force reflow to guarantee CSS transition start
+      incomingScene.classList.add('active', 'visible');
+
+      // Reset detail prompt and active hotspots
+      if (tourDetail) {
+        tourDetail.textContent = 'Sélectionnez un point pour découvrir les détails du bien.';
+        tourDetail.classList.remove('highlighted');
+      }
+      allHotspots.forEach(h => h.classList.remove('active'));
+
+      currentSceneIndex = targetIndex;
+
+      // Clean up leaving state after transition completes (matching CSS 650-750ms)
+      transitionTimer = window.setTimeout(() => {
+        tourScenes.forEach(s => {
+          if (s !== incomingScene) {
+            s.classList.remove('leaving', 'active', 'visible', 'dir-next', 'dir-prev');
+          }
+        });
+        incomingScene.classList.remove('dir-next', 'dir-prev');
+        isTransitioning = false;
+        transitionTimer = null;
+      }, 750);
+    }
+
+    // Initialize first scene on load
+    const initialScene = getSceneElement(0);
+    if (initialScene) {
+      initialScene.classList.add('active', 'visible');
+    }
+    tourTabs.forEach((tab, idx) => {
+      tab.classList.toggle('active', idx === 0);
+      tab.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+    });
+    if (tourProgress) {
+      tourProgress.textContent = `01 / 0${sceneKeys.length}`;
+    }
+
+    // Tab click listeners for 'Extérieur', 'Intérieur', 'Alentours'
+    tourTabs.forEach((tab) => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sceneKey = tab.dataset.scene;
+        if (sceneKey) {
+          switchTourScene(sceneKey);
+        }
+      });
+    });
+
+    // Previous and Next buttons
+    if (tourPrev) {
+      tourPrev.addEventListener('click', (e) => {
+        e.preventDefault();
+        const prevIndex = (currentSceneIndex - 1 + sceneKeys.length) % sceneKeys.length;
+        switchTourScene(prevIndex, -1);
+      });
+    }
+
+    if (tourNext) {
+      tourNext.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nextIndex = (currentSceneIndex + 1) % sceneKeys.length;
+        switchTourScene(nextIndex, 1);
+      });
+    }
+
+    // Hotspot interaction
+    allHotspots.forEach((hotspot) => {
+      hotspot.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const parentScene = hotspot.closest('.tour-scene');
+        if (parentScene) {
+          parentScene.querySelectorAll('.tour-hotspot').forEach(h => h.classList.remove('active'));
+        }
+        hotspot.classList.add('active');
+
+        const detailText = hotspot.dataset.detail;
+        if (tourDetail && detailText) {
+          tourDetail.textContent = detailText;
+          tourDetail.classList.remove('highlighted');
+          void tourDetail.offsetWidth; // Re-trigger highlight pulse
+          tourDetail.classList.add('highlighted');
+        }
+      });
+    });
+
+    // Close and open handlers
+    function closeTourModal() {
+      tourModal.classList.remove('open');
+      tourModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    function openTourModal(propInfo = {}) {
+      if (tourTitle && propInfo.name) tourTitle.textContent = propInfo.name;
+      if (tourLocation && propInfo.location) {
+        tourLocation.textContent = `${propInfo.location} · Aperçu 3D des scènes`;
+      }
+      tourModal.classList.add('open');
+      tourModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      switchTourScene(0); // Reset to Extérieur
+    }
+
+    if (tourClose) tourClose.addEventListener('click', closeTourModal);
+    if (tourBackdrop) tourBackdrop.addEventListener('click', closeTourModal);
+
+    // Keyboard navigation: Escape to close, Arrow keys to navigate scenes
+    document.addEventListener('keydown', (e) => {
+      if (!tourModal.classList.contains('open')) return;
+      if (e.key === 'Escape') {
+        closeTourModal();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prevIndex = (currentSceneIndex - 1 + sceneKeys.length) % sceneKeys.length;
+        switchTourScene(prevIndex, -1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const nextIndex = (currentSceneIndex + 1) % sceneKeys.length;
+        switchTourScene(nextIndex, 1);
+      }
+    });
+
+    // Touch swipe navigation on mobile/touch devices
+    if (tourStage) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      tourStage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      tourStage.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+            if (deltaX < 0) {
+              const nextIndex = (currentSceneIndex + 1) % sceneKeys.length;
+              switchTourScene(nextIndex, 1);
+            } else {
+              const prevIndex = (currentSceneIndex - 1 + sceneKeys.length) % sceneKeys.length;
+              switchTourScene(prevIndex, -1);
+            }
+          }
+        }
+      }, { passive: true });
+    }
+
+    // Interactive trigger for the 3D Virtual Feature section
+    const virtualFeatureArt = document.querySelector('.virtual-feature-art');
+    if (virtualFeatureArt) {
+      virtualFeatureArt.style.cursor = 'pointer';
+      virtualFeatureArt.setAttribute('title', 'Explorer les scènes 3D immersives');
+      virtualFeatureArt.setAttribute('tabindex', '0');
+      virtualFeatureArt.setAttribute('role', 'button');
+      virtualFeatureArt.addEventListener('click', () => {
+        openTourModal({
+          name: 'Hôtel Particulier Champ-de-Mars',
+          location: 'Paris 7e · Tour Eiffel'
+        });
+      });
+      virtualFeatureArt.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openTourModal({
+            name: 'Hôtel Particulier Champ-de-Mars',
+            location: 'Paris 7e · Tour Eiffel'
+          });
+        }
+      });
+    }
+
+    // Global triggers for tour modal
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('.tour-modal-trigger, [data-action="open-tour-modal"]');
+      if (!trigger) return;
+      e.preventDefault();
+      const card = trigger.closest('.property-card');
+      const name = trigger.dataset.property || card?.dataset.property || 'Propriété d\'Exception';
+      const loc = trigger.dataset.location || card?.dataset.location || 'Paris';
+      openTourModal({ name, location: loc });
+    });
+
+    // Expose helpers on window for external callers and tests
+    window.openTourModal = openTourModal;
+    window.closeTourModal = closeTourModal;
+    window.switchTourScene = switchTourScene;
+  }
+
+  // -------------------------------------------------------------
   // SIMULATEUR DE CRÉDIT IMMOBILIER (Loan & Mortgage Calculator)
   // -------------------------------------------------------------
   let mortgageRates = { 10: 3.15, 15: 3.30, 20: 3.45, 25: 3.60 };

@@ -214,7 +214,7 @@ export class TourViewer {
     this.onWheel = (e) => {
       e.preventDefault();
       const zoomFactor = e.deltaY * 0.05;
-      this.targetFov = clamp(this.targetFov + zoomFactor, 35, 95);
+      this.targetFov = clamp(this.targetFov + zoomFactor, 20, 95);
     };
 
     this.onResize = () => {
@@ -378,6 +378,10 @@ export class TourViewer {
           this.switchScene(targetSceneId);
         },
         onInfo: (info) => {
+          if (typeof info.yaw === 'number' && typeof info.pitch === 'number') {
+            const targetZoom = info.zoomFov || 30;
+            this.focusOnCoordinate(info.yaw, info.pitch, targetZoom);
+          }
           this.onHotspotInfo?.(info);
         },
       });
@@ -484,17 +488,36 @@ export class TourViewer {
   }
 
   zoomIn() {
-    this.targetFov = clamp(this.targetFov - 12, 35, 95);
+    this.targetFov = clamp(this.targetFov - 12, 20, 95);
   }
 
   zoomOut() {
-    this.targetFov = clamp(this.targetFov + 12, 35, 95);
+    this.targetFov = clamp(this.targetFov + 12, 20, 95);
   }
 
-  resetView() {
+  /**
+   * Smoothly glides camera to focus on an architectural detail hotspot
+   * @param {number} yaw
+   * @param {number} pitch
+   * @param {number} [fov=30]
+   */
+  focusOnCoordinate(yaw, pitch, fov = 30) {
+    // Determine shortest angular path for continuous seamless rotation
+    const currentNorm = normalizeAngle(this.yaw);
+    const targetNorm = normalizeAngle(yaw);
+    let diff = targetNorm - currentNorm;
+    if (diff > Math.PI) diff -= Math.PI * 2;
+    if (diff < -Math.PI) diff += Math.PI * 2;
+
+    this.targetYaw = this.yaw + diff;
+    this.targetPitch = clamp(pitch, -Math.PI / 2.3, Math.PI / 2.3);
+    this.targetFov = clamp(fov, 20, 95);
+  }
+
+  resetView(targetFov = 75) {
     this.targetYaw = 0;
     this.targetPitch = 0;
-    this.targetFov = 75;
+    this.targetFov = clamp(targetFov, 20, 95);
   }
 
   /* -------------------------------------------------------------------------- */

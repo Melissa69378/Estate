@@ -89,6 +89,9 @@ export class PropertyTour {
 
     const startingScene = this.tourData.scenes.find((s) => s.id === this.tourData.startingSceneId) || this.tourData.scenes[0];
 
+    const getRoomDetails = (scene) => (scene?.hotspots || []).filter((h) => h.type === 'detail' || h.type === 'info' || h.isBlinking);
+    const initialDetails = getRoomDetails(startingScene);
+
     // 1. Loading & Error components
     this.loading = new TourLoading();
     modalsLayer.appendChild(this.loading.element);
@@ -105,8 +108,23 @@ export class PropertyTour {
     });
     modalsLayer.appendChild(this.error.element);
 
-    // 2. Info Panel
-    this.infoPanel = new TourInfoPanel();
+    // 2. Info Panel / Closer Detail Inspector
+    this.infoPanel = new TourInfoPanel({
+      onFocusCamera: (detail) => {
+        if (this.viewer && typeof detail.yaw === 'number' && typeof detail.pitch === 'number') {
+          this.viewer.focusOnCoordinate(detail.yaw, detail.pitch, detail.zoomFov || 28);
+        }
+      },
+      onResetCamera: () => {
+        this.viewer?.resetView();
+      },
+      onSelectDetail: (detail) => {
+        if (this.viewer && typeof detail.yaw === 'number' && typeof detail.pitch === 'number') {
+          this.viewer.focusOnCoordinate(detail.yaw, detail.pitch, detail.zoomFov || 28);
+        }
+      },
+    });
+    this.infoPanel.setRoomDetails(initialDetails);
     modalsLayer.appendChild(this.infoPanel.element);
 
     // 3. Floor Plan Modal
@@ -167,9 +185,17 @@ export class PropertyTour {
     // 8. Controls Bar
     this.controls = new TourControls({
       hasFloorPlan: Boolean(this.tourData.floorPlan?.imageUrl),
+      detailsCount: initialDetails.length,
       onZoomIn: () => this.viewer?.zoomIn(),
       onZoomOut: () => this.viewer?.zoomOut(),
       onResetView: () => this.viewer?.resetView(),
+      onInspectDetails: () => {
+        const currentScene = this.tourData.scenes.find((s) => s.id === this.viewer?.currentSceneId) || startingScene;
+        const details = getRoomDetails(currentScene);
+        if (details.length > 0) {
+          this.infoPanel?.show(details[0]);
+        }
+      },
       onToggleFloorPlan: () => {
         this.floorPlanModal?.toggle();
         this.controls?.setFloorPlanActive(!this.floorPlanModal?.element.classList.contains('hidden'));
@@ -190,6 +216,10 @@ export class PropertyTour {
           this.sceneSelector?.setActiveScene(newSceneId);
           if (scene.floor) this.floorSelector?.setActiveFloor(scene.floor);
           this.floorPlanModal?.setActiveScene(newSceneId);
+
+          const roomDetails = getRoomDetails(scene);
+          this.infoPanel?.setRoomDetails(roomDetails);
+          this.controls?.setDetailsCount(roomDetails.length);
         }
       },
       onHotspotInfo: (info) => {

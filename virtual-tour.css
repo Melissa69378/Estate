@@ -6,8 +6,13 @@ button:active { transform: translateY(1px); }
 .virtual-feature { display: grid; grid-template-columns: .9fr 1.1fr; gap: 8vw; align-items: center; padding: 120px 11vw; background: #e9e6dc; overflow: hidden; }
 .virtual-feature-copy h2 { color: var(--forest); font-size: clamp(48px, 6vw, 86px); margin-bottom: 24px; }
 .virtual-feature-copy > p:not(.eyebrow) { max-width: 420px; color: #68766d; line-height: 1.8; font-size: 14px; }
-.featured-tour-trigger { margin-top: 22px; border: 0; background: var(--forest); color: #fff; padding: 16px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; }
-.featured-tour-trigger span { color: var(--orange); margin-left: 23px; font-size: 16px; }
+.virtual-feature-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; align-items: center; }
+.featured-tour-trigger { border: 0; background: var(--forest); color: #fff; padding: 16px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; font-weight: 600; transition: background 0.2s, transform 0.2s; }
+.featured-tour-trigger:hover { background: #071912; transform: translateY(-1px); }
+.featured-tour-trigger span { color: var(--orange); margin-left: 14px; font-size: 16px; }
+.btn-secondary-tour { border: 1px solid var(--forest); background: transparent; color: var(--forest); padding: 15px 20px; cursor: pointer; text-transform: uppercase; letter-spacing: .13em; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 10px; transition: all 0.25s ease; }
+.btn-secondary-tour:hover { background: var(--forest); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(9, 28, 22, 0.15); }
+.btn-secondary-tour span { color: var(--tour-gold); font-size: 14px; }
 .virtual-feature-art { min-height: 490px; position: relative; overflow: hidden; color: #fff; background: linear-gradient(120deg, rgba(9,28,22,.15), rgba(9,28,22,.78)), url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85') center/cover; }
 .virtual-feature-art:after { content: ''; position: absolute; inset: 18px; border: 1px solid rgba(255,255,255,.3); pointer-events: none; }
 .feature-art-label { position: absolute; z-index: 1; left: 35px; bottom: 34px; display: grid; gap: 12px; }
